@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-09-24 11:19",
+  "fecha": "2026-09-24 11:52",
   "raiz": "C:\\Users\\Camilo\\Documents\\Volante TDG\\virtual_mpc_car\\P00_control_lateral\\empaquetado\\dist\\Trial_Steer\\P00_control_lateral",
   "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
   "ejecutable": "C:\\Users\\Camilo\\Documents\\Volante TDG\\virtual_mpc_car\\P00_control_lateral\\empaquetado\\dist\\Trial_Steer\\Trial_Steer_consola.exe",
@@ -40,7 +40,7 @@
       "control": "Prueba de controladores / Corrida / Restaurar configuración del juego",
       "resultado": "ok",
       "dialogos": [
-        "showinfo, Restaurar, No hay respaldos. La plantilla nunca cambió la configuración del juego."
+        "showerror, Restaurar, Cierra Assetto Corsa antes de restaurar la configuración."
       ]
     },
     {

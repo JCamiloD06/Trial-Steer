@@ -59,7 +59,7 @@ PREFIJO_MPC_GUARDADA = "Corrida guardada en:"
 class Lanzador(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Lanzador de pruebas en Assetto Corsa")
+        self.title("Trial Steer")
         self.geometry("1180x860")
         self.proceso = None
         self.cola = queue.Queue()

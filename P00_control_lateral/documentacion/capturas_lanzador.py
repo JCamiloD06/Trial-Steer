@@ -16,6 +16,10 @@ lanzador, que no le quita el foco al simulador.
 Uso desde la raíz del repositorio, con el simulador cerrado.
     python P00_control_lateral/documentacion/capturas_lanzador.py
     python P00_control_lateral/documentacion/capturas_lanzador.py --solo-capturas
+    python P00_control_lateral/documentacion/capturas_lanzador.py --experimentos 1
+
+Con --experimentos solo se corren los experimentos indicados, y sus corridas
+reemplazan a las anteriores en capturas/corridas_doc.json sin tocar las demás.
 """
 import argparse
 import ctypes
@@ -88,10 +92,10 @@ def capturar(ventana, nombre):
 
 
 class Guion:
-    def __init__(self, ventana, solo_capturas):
+    def __init__(self, ventana, solo_capturas, experimentos=None):
         self.v = ventana
         self.solo = solo_capturas
-        self.pendientes = list(EXPERIMENTOS)
+        self.pendientes = [e for e in EXPERIMENTOS if not experimentos or e["n"] in experimentos]
         self.actual = None
         self.t_proceso = None
         self.vivo_hecho = False
@@ -204,7 +208,11 @@ class Guion:
 
     def fin(self):
         if self.resultados:
-            REGISTRO.write_text(json.dumps(self.resultados, indent=2, ensure_ascii=False), encoding="utf-8")
+            previos = json.loads(REGISTRO.read_text(encoding="utf-8")) if REGISTRO.exists() else []
+            nuevos = {r["n"] for r in self.resultados}
+            todos = [r for r in previos if r["n"] not in nuevos] + self.resultados
+            REGISTRO.write_text(json.dumps(sorted(todos, key=lambda r: r["n"]), indent=2, ensure_ascii=False),
+                                encoding="utf-8")
         log("guion terminado")
         self.v.after(1000, self.v.destroy)
 
@@ -212,10 +220,12 @@ class Guion:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--solo-capturas", action="store_true")
+    ap.add_argument("--experimentos", default="", help="números separados por coma, por omisión todos")
     args = ap.parse_args()
     ventana = mod_app.Lanzador()
     ventana.geometry("1180x840+0+0")
-    guion = Guion(ventana, args.solo_capturas)
+    experimentos = {int(x) for x in args.experimentos.split(",") if x.strip()}
+    guion = Guion(ventana, args.solo_capturas, experimentos)
     ventana.after(2500, guion.estaticas)
     ventana.mainloop()
 

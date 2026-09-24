@@ -90,7 +90,7 @@ La plantilla de sesión que escribe el software ya asigna vJoy como volante del 
 
 ## 4.1. Ventana principal
 
-La ventana se titula Lanzador de pruebas en Assetto Corsa. Tiene dos pestañas principales, *Prueba de controladores* y *MPC completo*, y una barra de estado inferior que muestra a la izquierda el estado de la corrida y a la derecha el estado del juego. La Figura [[fig:inicio]] muestra la ventana al abrirse.
+La ventana se titula Trial Steer. Tiene dos pestañas principales, *Prueba de controladores* y *MPC completo*, y una barra de estado inferior que muestra a la izquierda el estado de la corrida y a la derecha el estado del juego. La Figura [[fig:inicio]] muestra la ventana al abrirse.
 
 ![Figura [[fig:inicio]]. Ventana del lanzador al abrirse.](capturas/01_lanzador_inicio.png){width=15.5cm}
 

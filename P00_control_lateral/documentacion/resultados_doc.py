@@ -52,15 +52,17 @@ def columna(carpeta, nombre, solo_medida=True):
 
 
 def recortar_capturas():
-    """Quita el borde negro que PrintWindow deja a la derecha y abajo de la ventana."""
+    """Quita el borde negro que PrintWindow deja alrededor de la ventana."""
     from PIL import Image
     for ruta in sorted((DIR / "capturas").glob("*.png")):
         img = np.asarray(Image.open(ruta).convert("RGB")).astype(int)
         oscuro = img.sum(axis=2) < 30
         filas = np.where(oscuro.mean(axis=1) < 0.9)[0]
         cols = np.where(oscuro.mean(axis=0) < 0.9)[0]
-        if filas.size and cols.size and (filas[-1] + 1 < img.shape[0] or cols[-1] + 1 < img.shape[1]):
-            Image.fromarray(img[: filas[-1] + 1, : cols[-1] + 1].astype(np.uint8)).save(ruta, dpi=(96, 96))
+        if filas.size and cols.size and (filas[0] > 0 or cols[0] > 0 or filas[-1] + 1 < img.shape[0]
+                                         or cols[-1] + 1 < img.shape[1]):
+            recorte = img[filas[0]: filas[-1] + 1, cols[0]: cols[-1] + 1]
+            Image.fromarray(recorte.astype(np.uint8)).save(ruta, dpi=(96, 96))
 
 
 def main():
