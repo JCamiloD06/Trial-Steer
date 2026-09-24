@@ -57,7 +57,7 @@ pip install -r P00_control_lateral/requirements.txt
 python P00_control_lateral/abrir_lanzador.py
 ```
 
-Pruebas automáticas, 143 verificaciones en siete archivos que no requieren el simulador.
+Pruebas automáticas, 144 verificaciones en siete archivos que no requieren el simulador.
 
 ```
 python P00_control_lateral/pruebas/prueba_humo.py
@@ -66,6 +66,10 @@ python P00_control_lateral/pruebas/prueba_humo.py
 Los demás archivos de `P00_control_lateral/pruebas/` se ejecutan igual.
 
 La instalación de Assetto Corsa se detecta sola cuando hay una sola en Steam. Las corridas se guardan en `data/raw/p00/corridas`, que no se versiona.
+
+## Componentes de terceros
+
+Assetto Corsa, Steam, vJoy, la trazada de Monza derivada de los archivos del juego y las librerías de Python son de terceros y no forman parte de la obra. Ver `P00_control_lateral/TERCEROS.md`.
 
 ## Licencia
 

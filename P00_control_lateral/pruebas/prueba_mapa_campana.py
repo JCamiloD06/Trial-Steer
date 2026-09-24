@@ -90,8 +90,21 @@ def main():
     verificar("no declara mejora si la reducción es menor al umbral",
               celda2["comparaciones"]["stanley"]["supera_umbral"] is False,
               str(round(celda2["comparaciones"]["stanley"]["reduccion_media_m"], 4)))
-    verificar("sin mejora la etiqueta lo dice",
-              celda2["comparaciones"]["stanley"]["etiqueta"] == "sin mejora practica")
+    verificar("con diferencia dentro del umbral la etiqueta dice equivalencia",
+              celda2["comparaciones"]["stanley"]["etiqueta"] == "equivalencia practica",
+              celda2["comparaciones"]["stanley"]["etiqueta"])
+
+    # Celda donde el MPC es peor por encima del umbral. Añadida el 2026-09-25,
+    # cuando la etiqueta pasó de dos categorías a tres.
+    filas2b = []
+    for s in range(1, 11):
+        filas2b.append(fila("mpc_cinematico", s, 0.200 + 0.001 * s))
+        filas2b.append(fila("stanley", s, 0.140 + 0.001 * s))
+        filas2b.append(fila("pure_pursuit", s, 0.145 + 0.001 * s))
+    celda2b = mc.analizar_celda(filas2b, "media", "nominal", "rmse_e_y_cg_m", umbral, cond)
+    verificar("con diferencia adversa sobre el umbral la etiqueta dice degradación",
+              celda2b["comparaciones"]["stanley"]["etiqueta"] == "degradacion practica",
+              celda2b["comparaciones"]["stanley"]["etiqueta"])
 
     # Condición de tiempo real y de suavidad.
     # Copia propia, si no la mutación contaminaría las comprobaciones siguientes.

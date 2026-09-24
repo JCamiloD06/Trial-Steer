@@ -18,13 +18,13 @@
 
 ## 1.3. Alcance del documento
 
-El manual cubre la instalación, la interfaz, el uso básico, seis experimentos paso a paso, la ubicación de los resultados, las buenas prácticas y la solución de problemas. Los detalles internos, ecuaciones y formatos están en el Manual técnico.
+El manual cubre la instalación, la interfaz, el uso básico, seis experimentos paso a paso, la ubicación de los resultados, las buenas prácticas y la solución de problemas. Los detalles internos, ecuaciones y formatos están en el Manual técnico. El manual corresponde a la versión registrada, Trial Steer v1.0.1, cuyo código fuente se congeló el 24 de septiembre de 2026.
 
 # 2. Descripción general del sistema
 
 ## 2.1. Qué necesita el usuario
 
-El usuario necesita un computador con Windows, Assetto Corsa instalado desde Steam con el circuito de Monza y el Alfa Romeo Giulietta QV, el controlador vJoy configurado como dispositivo 1, Python 3.14 con las librerías del archivo `requirements.txt` y una copia del repositorio. No necesita volante físico, porque el software maneja el vehículo a través de vJoy.
+El usuario necesita un computador con Windows, Assetto Corsa instalado desde Steam con el circuito de Monza y el Alfa Romeo Giulietta QV, y el controlador vJoy configurado como dispositivo 1. Para utilizar el ejecutable distribuido de Trial Steer no es necesario instalar Python. Para ejecutar el software desde el código fuente se requieren Python 3.14 y las dependencias indicadas en `requirements.txt`. No necesita volante físico, porque el software maneja el vehículo a través de vJoy.
 
 ## 2.2. Qué hace el sistema
 
@@ -81,6 +81,8 @@ Desde el código fuente, con Python instalado.
 2. Instale Python 3.14.
 3. Abra una terminal en la raíz del repositorio y ejecute `python -m pip install -r P00_control_lateral/requirements.txt`.
 4. Ejecute `python P00_control_lateral/abrir_lanzador.py` desde la raíz del repositorio.
+
+El directorio `P00_control_lateral` conserva la denominación histórica usada durante el desarrollo, cuando el software se escribió para el estudio P00 de comparación de controladores laterales, y se mantiene en la versión 1.0.1 por compatibilidad con la estructura del código, que calcula sus rutas a partir de ella.
 
 ## 3.4. Configuración de vJoy en el simulador
 

@@ -1,0 +1,37 @@
+Copyright (c) 2026 Francisco Javier Burgos Flórez, Juan Camilo Díaz López y Jesus Alberto Lastra Robles
+
+Todos los derechos reservados.
+
+Este software ("Trial Steer"), incluyendo pero no limitado a su código
+fuente, configuraciones, documentación, figuras y cualquier otro material
+contenido en este repositorio, es propiedad intelectual exclusiva de los
+autores mencionados anteriormente.
+
+Este software fue desarrollado en el marco del programa de Ingeniería
+Mecatrónica de la Universidad Nacional de Colombia, Sede de La Paz, bajo
+la supervisión del profesor Francisco Javier Burgos Flórez, como parte del
+proyecto integral Volante direct-drive con Force Feedback.
+
+No se concede ningún permiso para usar, copiar, modificar, fusionar,
+publicar, distribuir, sublicenciar y/o vender copias de este software o de
+partes de él, ni para permitir que terceros a quienes se les proporcione
+el software lo hagan, sin la autorización previa y por escrito de los
+autores.
+
+Se permite el acceso y la revisión de este material exclusivamente con
+fines de evaluación académica por parte de docentes y evaluadores
+autorizados de la Universidad Nacional de Colombia, sin que esto implique
+cesión de derechos ni autorización de uso, copia o distribución.
+
+## Componentes de terceros
+
+Assetto Corsa, Steam, vJoy y las librerías de Python indicadas en
+requirements.txt son productos de terceros, no se distribuyen en este
+repositorio y se rigen por sus propias licencias.
+
+ESTE SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO,
+EXPRESA O IMPLÍCITA. EN NINGÚN CASO LOS AUTORES SERÁN RESPONSABLES POR
+NINGÚN RECLAMO, DAÑO U OTRA RESPONSABILIDAD DERIVADA DEL USO DE ESTE
+SOFTWARE.
+
+Para solicitar autorización de uso, contactar a los autores.

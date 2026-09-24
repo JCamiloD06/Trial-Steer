@@ -31,6 +31,22 @@ CORRIDAS = RAIZ_REPO / "data" / "raw" / "p00" / "corridas"
 SALIDA = RAIZ_REPO / "tables" / "p00"
 
 NOMBRE_CTRL = {"pure_pursuit": "Pure Pursuit", "stanley": "Stanley", "mpc_cinematico": "MPC cinemático"}
+# Nombres para lectura, en lugar de los identificadores internos del proyecto.
+NOMBRE_PERFIL = {"conservador": "Conservador", "nominal": "Nominal", "rapido": "Rápido"}
+NOMBRE_REGION = {"baja": "Baja", "media": "Media", "alta": "Alta"}
+NOMBRE_VEHICULO = {"alfa_romeo_giulietta_qv": "Alfa Romeo Giulietta QV"}
+NOMBRE_PISTA = {"monza": "Monza"}
+SIMBOLO = {"L0_m": "L0 en m", "kv_s": "kv en s", "k": "k", "Qpsi": "Qψ",
+           "Rdelta": "Rδ", "Rddelta": "RΔδ", "Qy": "Qy", "epsilon_ms": "ε en m/s"}
+VEREDICTO = {"mejora practica de bajo costo": "Mejora práctica de bajo costo",
+             "mejora practica con mayor actividad de direccion":
+                 "Mejora práctica con mayor actividad de dirección",
+             "mejora practica con actividad muy superior":
+                 "Mejora práctica con actividad muy superior",
+             "degradacion practica": "Degradación práctica",
+             "equivalencia practica": "Equivalencia práctica",
+             "sin mejora practica": "Sin mejora práctica",
+             "no evaluable": "No evaluable"}
 ORDEN_CTRL = ("pure_pursuit", "stanley", "mpc_cinematico")
 ORDEN_PERFIL = ("conservador", "nominal", "rapido")
 ORDEN_REGION = ("baja", "media", "alta")
@@ -136,13 +152,14 @@ def tabla_sintonia():
         gan = bloque["ganadora"]
         rango = rangos.get("controladores", {}).get(ctrl, {}) if isinstance(rangos, dict) else {}
         texto_rango = ", ".join(
-            f"{k} de {v['min']:g} a {v['max']:g}" + (" en escala log" if v.get("escala") == "log" else "")
+            f"{SIMBOLO.get(k, k)} de {v['min']:g} a {v['max']:g}"
+            + (" en escala logarítmica" if v.get("escala") == "log" else "")
             for k, v in sorted(rango.items())
-            if isinstance(v, dict) and "min" in v and "max" in v) or "ver configs/rangos_sintonia.json"
+            if isinstance(v, dict) and "min" in v and "max" in v) or "sin parámetros libres"
         # Solo los parámetros que la búsqueda movió. El resto son constantes de
         # la formulación y ya están en la tabla de parámetros congelados.
         moviles = sorted(rango) if rango else sorted(gan["parametros"])
-        adoptada = ", ".join(f"{k} {gan['parametros'][k]:.6g}" for k in moviles
+        adoptada = ", ".join(f"{SIMBOLO.get(k, k)} {gan['parametros'][k]:.6g}" for k in moviles
                              if isinstance(gan["parametros"].get(k), (int, float)))
         razon = gan.get("razon_esfuerzo")
         t.fila(NOMBRE_CTRL[ctrl], texto_rango, len(corridas), bloque["n_candidatas"], descartadas,
@@ -205,9 +222,11 @@ def tabla_verificacion():
     modelos = {m["assetto_corsa"].get("carModel") for m in manifiestos}
     versiones = {m["assetto_corsa"].get("acVersion") for m in manifiestos}
     pistas = {m["assetto_corsa"].get("track") for m in manifiestos}
-    t.fila("Vehículo", "igual en todas las corridas", ", ".join(sorted(x for x in modelos if x)),
+    t.fila("Vehículo", "igual en todas las corridas",
+           ", ".join(NOMBRE_VEHICULO.get(x, x) for x in sorted(x for x in modelos if x)),
            f"{len(manifiestos)} de {len(manifiestos)}" if len(modelos) == 1 else "no homogéneo")
-    t.fila("Pista", "igual en todas las corridas", ", ".join(sorted(x for x in pistas if x)),
+    t.fila("Pista", "igual en todas las corridas",
+           ", ".join(NOMBRE_PISTA.get(x, x) for x in sorted(x for x in pistas if x)),
            f"{len(manifiestos)} de {len(manifiestos)}" if len(pistas) == 1 else "no homogéneo")
     t.fila("Versión de Assetto Corsa", "igual en todas las corridas",
            ", ".join(sorted(x for x in versiones if x)),
@@ -218,16 +237,20 @@ def tabla_verificacion():
     agregar("Batalla medida", "estable entre corridas, en m", "L_medida_mediana_m", ".3f", lambda v: v > 0)
     agregar("Ciclos con contactos válidos", "cercano a 100 por ciento", "pct_contactos_ok", ".1f",
             lambda v: v > 95.0)
-    agregar("Periodo del ciclo", "cercano a 50 ms", "periodo_ms_media", ".2f", lambda v: 45.0 <= v <= 55.0)
-    agregar("Tiempo de cómputo, p95", "por debajo del periodo de 50 ms", "tc_ms_p95", ".2f",
-            lambda v: v < 50.0)
-    agregar("Ciclos bajo 50 ms", "al menos 99 por ciento, decisión 1.4", "pct_tc_mayor_50ms", ".2f",
-            lambda v: v <= 1.0)
-    agregar("Saturación de magnitud", "informativo, en porcentaje", "pct_sat_magnitud", ".2f",
+    agregar("Periodo del ciclo en ms", "cercano a 50 ms", "periodo_ms_media", ".2f",
+            lambda v: 45.0 <= v <= 55.0)
+    agregar("Tiempo de cómputo, percentil 95 en ms", "por debajo del periodo de 50 ms",
+            "tc_ms_p95", ".2f", lambda v: v < 50.0)
+    # La etiqueta decía ciclos bajo 50 ms y el valor era el porcentaje de ciclos
+    # por encima, de modo que una mediana de 0.00 parecía un incumplimiento.
+    # Corregido el 2026-09-25 tras la auditoría del manuscrito.
+    agregar("Ciclos por encima de 50 ms, en porcentaje", "como máximo 1 por ciento",
+            "pct_tc_mayor_50ms", ".2f", lambda v: v <= 1.0)
+    agregar("Saturación de magnitud, en porcentaje", "informativo", "pct_sat_magnitud", ".2f",
             lambda v: True)
-    agregar("Saturación de tasa", "informativo, en porcentaje", "pct_sat_tasa", ".2f", lambda v: True)
-    agregar("Respaldo del controlador", "informativo, en porcentaje", "pct_respaldo_controlador", ".2f",
-            lambda v: True)
+    agregar("Saturación de tasa, en porcentaje", "informativo", "pct_sat_tasa", ".2f", lambda v: True)
+    agregar("Ciclos con ángulo retenido por el limitador de tasa, en porcentaje", "informativo",
+            "pct_direccion_retenida", ".2f", lambda v: True)
     return t
 
 
@@ -251,7 +274,8 @@ def tabla_campana():
                 r = celda["por_controlador"].get(ctrl)
                 if r is None:
                     continue
-                t.fila(perfil, region, celda.get("sesiones_completas", celda.get("sesiones")),
+                t.fila(NOMBRE_PERFIL[perfil], NOMBRE_REGION[region],
+                       celda.get("sesiones_completas", celda.get("sesiones")),
                        NOMBRE_CTRL[ctrl], f"{r['rmse_medio_m']:.4f}", f"{r['rmse_mediana_m']:.4f}",
                        f"{r['rms_tasa_media_rad_s']:.5f}", r.get("vueltas_fallidas", ""),
                        f"{r.get('pct_tc_mayor_50ms_max', 0.0):.2f}")
@@ -269,6 +293,7 @@ def tabla_contrastes():
               "positiva favorece al MPC. El veredicto exige superar el umbral, que el intervalo "
               "no lo cruce y valor p corregido por Holm menor que 0.05.",
               ["Perfil", "Región", "Comparación", "Reducción media en m", "IC 95 por ciento en m",
+               "Reducción relativa en porcentaje", "Correlación biserial de rangos",
                "Umbral en m", "p de Wilcoxon", "p de Holm", "Razón de esfuerzo", "Veredicto"])
     for perfil in ORDEN_PERFIL:
         for region in ORDEN_REGION:
@@ -281,14 +306,19 @@ def tabla_contrastes():
                     continue
                 ic = comp.get("ic95_bootstrap_m", [None, None])
                 razon = comp.get("razon_esfuerzo_mpc_sobre_geometrico")
-                t.fila(perfil, region, f"MPC frente a {NOMBRE_CTRL[ctrl]}",
+                rel = comp.get("reduccion_relativa_pct")
+                rb = comp.get("r_rangos_biserial")
+                t.fila(NOMBRE_PERFIL[perfil], NOMBRE_REGION[region],
+                       f"MPC frente a {NOMBRE_CTRL[ctrl]}",
                        f"{comp['reduccion_media_m']:+.4f}",
                        "" if ic[0] is None else f"de {ic[0]:+.4f} a {ic[1]:+.4f}",
+                       "" if rel is None else f"{rel:+.1f}",
+                       "" if rb is None else f"{rb:+.2f}",
                        f"{comp['umbral_m']:.5f}",
                        f"{comp.get('wilcoxon_p', float('nan')):.4f}",
                        f"{comp.get('p_holm', float('nan')):.4f}",
                        "" if razon is None else f"{razon:.2f}",
-                       comp.get("etiqueta", ""))
+                       VEREDICTO.get(comp.get("etiqueta", ""), comp.get("etiqueta", "")))
     return t
 
 

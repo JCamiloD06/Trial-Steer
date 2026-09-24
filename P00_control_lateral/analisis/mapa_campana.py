@@ -110,8 +110,8 @@ def rango_biserial(dif):
     """
     Correlación biserial de rangos para pares emparejados, tamaño de efecto que
     acompaña al contraste de Wilcoxon. Vale 1 cuando todas las sesiones van en
-    el sentido favorable al MPC y menos 1 cuando todas van en contra. Se pide
-    en la sección de análisis estadístico del manuscrito. Añadido el 2026-09-24.
+    el sentido favorable al MPC y menos 1 cuando todas van en contra. Añadido el
+    2026-09-24.
     """
     a = np.asarray([d for d in dif if d != 0], dtype=float)
     if a.size == 0:
@@ -140,7 +140,7 @@ def holm(pvalores):
 
 def veredicto(comp, alfa=0.05):
     """
-    Regla de decisión completa, docs/ANALYSIS.md sección 2. Exige superar el
+    Regla de decisión completa del mapa. Exige superar el
     umbral, que el extremo inferior del intervalo bootstrap tampoco lo cruce y
     que el valor p corregido por Holm quede por debajo de alfa. El valor p
     corregido solo existe después de recorrer la familia de nueve celdas, de
@@ -169,7 +169,20 @@ def etiquetar(comp, razon, evaluable, cfg_cond, mejora=None):
     if mejora is None:
         mejora = comp.get("supera_umbral") is True
     if not mejora:
-        return "sin mejora practica"
+        # Tres categorias, no dos. La ausencia de mejora se separa en
+        # degradacion practica, cuando la diferencia adversa supera el mismo
+        # umbral, y equivalencia practica, cuando queda dentro del umbral en
+        # los dos sentidos. Corregido el 2026-09-25 tras una revision que
+        # encontro la tabla de resultados con una sola etiqueta mientras el
+        # metodo declaraba tres.
+        umbral = comp.get("umbral_m")
+        if umbral is None:
+            return "sin mejora practica"
+        adversa = -comp.get("reduccion_media_m", 0.0)
+        alto = (comp.get("ic95_bootstrap_m") or [None, None])[1]
+        if adversa > umbral and alto is not None and -alto > umbral:
+            return "degradacion practica"
+        return "equivalencia practica"
     if razon <= cfg_cond["banda_bajo_costo"]:
         return "mejora practica de bajo costo"
     if razon <= cfg_cond["banda_actividad_superior"]:

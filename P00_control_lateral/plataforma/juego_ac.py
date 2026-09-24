@@ -1,7 +1,7 @@
 """
-Apertura y preparación de Assetto Corsa para una corrida de P00.
+Apertura y preparación de Assetto Corsa para una corrida de Trial Steer.
 
-Herramienta del lanzador, no es aporte del artículo. Resuelve tres cosas
+Herramienta del lanzador. Resuelve tres cosas
 verificadas en la prueba del 2026-09-16.
 
 Primero, abrir el juego. acs.exe solo abre directo si la carpeta del juego

@@ -180,7 +180,9 @@ def main():
                     "calibración cuando la diferencia supera 15 por ciento. La identificación de referencia de la "
                     "constante se hace con `analisis/identificar_direccion.py`, que usa filtros adicionales e "
                     "intervalos por bloques. Una diferencia como esta es una señal para repetir esa identificación, "
-                    "no una medición concluyente."
+                    "no una medición concluyente. El punto no conforme corresponde a una comprobación diagnóstica "
+                    "de calibración, no impide la ejecución ni invalida la corrida, y se mantiene en el manual "
+                    "para ilustrar cómo se interpreta la pestaña."
                     if "Constante de la cadena de dirección" in no else ""))
         (FRAG / "exp6.md").write_text(texto + "\n", encoding="utf-8")
     resumen = {n: {"carpeta": d["carpeta"], "tiempo_vuelta_s": d["met"]["tiempo_vuelta_s"],

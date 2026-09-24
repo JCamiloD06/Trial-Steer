@@ -1,5 +1,5 @@
 {
-  "_descripcion": "Apertura y preparación de Assetto Corsa desde el lanzador. Prueba del 2026-09-16 en docs/P00_PLAN_CONTROLADORES.md.",
+  "_descripcion": "Apertura y preparación de Assetto Corsa desde el lanzador, verificada el 2026-09-16.",
   "ruta_ac": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\assettocorsa",
   "steam_appid": "244210",
   "_nota_steam_appid": "Sin steam_appid.txt en la carpeta del juego, acs.exe termina con código 53 y Steam abre el lanzador oficial, que reescribe la carpeta cfg. Verificado el 2026-09-16.",

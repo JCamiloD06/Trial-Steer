@@ -4,55 +4,66 @@ Construye el ejecutable de Trial Steer con PyInstaller.
 Pasos.
     1. PyInstaller arma dist/Trial_Steer con Trial_Steer.exe, Trial_Steer_consola.exe
        y las librerías en _internal.
-    2. Se copian junto a los ejecutables los mismos archivos del código fuente
-       que van en el zip del registro, con la estructura de carpetas del
+    2. Se copian junto a los ejecutables los archivos de empaquetado/contenido.py,
+       los mismos del zip del código fuente, con la estructura de carpetas del
        repositorio, porque el código calcula sus rutas a partir de su ubicación.
-    3. Se comprime la carpeta en documentacion/entrega/Trial_Steer_v<versión>_windows.zip.
+    3. Se comprime la carpeta en empaquetado/dist/Trial_Steer_v<versión>_windows.zip.
 
-Uso desde la raíz del repositorio.
+Solo usa archivos del propio paquete, version.py y empaquetado/contenido.py, de
+modo que funciona también a partir del zip del código fuente.
+
+Uso desde la raíz del repositorio, con PyInstaller instalado.
     python P00_control_lateral/empaquetado/construir_exe.py
 """
-import json
 import shutil
 import subprocess
 import sys
+import tempfile
 import zipfile
 from pathlib import Path
 
 DIR = Path(__file__).resolve().parent
 RAIZ_P00 = DIR.parent
-RAIZ_REPO = RAIZ_P00.parent
-sys.path.insert(0, str(RAIZ_P00 / "documentacion"))
+sys.path.insert(0, str(RAIZ_P00))
+sys.path.insert(0, str(DIR))
 
-import empaquetar_codigo as emp  # noqa: E402
+import contenido  # noqa: E402
+import version  # noqa: E402
 
 DIST = DIR / "dist" / "Trial_Steer"
+LEEME = f"""{version.NOMBRE} {version.VERSION}
+
+Abrir Trial_Steer.exe. Trial_Steer_consola.exe lo usa el programa para las corridas y no se abre a mano.
+Requiere Windows, Assetto Corsa con Steam y el controlador vJoy instalados.
+El programa encuentra solo la instalación del juego en las bibliotecas de Steam y crea steam_appid.txt si falta.
+Solo si hay varias instalaciones hay que escribir la elegida en ruta_ac de P00_control_lateral/configs/juego_ac.json.
+Las corridas se guardan en data/raw/p00/corridas dentro de esta carpeta.
+Assetto Corsa, Steam, vJoy y las librerías incluidas son de terceros, ver P00_control_lateral/TERCEROS.md.
+"""
 
 
 def main():
     r = subprocess.run([sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean",
-                        "--distpath", str(DIR / "dist"), "--workpath", str(DIR / "build"),
+                        "--distpath", str(DIR / "dist"),
+                        "--workpath", str(Path(tempfile.gettempdir()) / "trial_steer_build"),
                         str(DIR / "trial_steer.spec")], cwd=DIR)
     if r.returncode != 0:
         sys.exit(r.returncode)
-    archivos = sorted(p for p in RAIZ_P00.rglob("*") if emp.incluir(p)) + emp.EXTRAS
+    archivos = contenido.archivos()
     for origen in archivos:
-        destino = DIST / origen.relative_to(RAIZ_REPO)
+        destino = DIST / origen.relative_to(contenido.RAIZ_REPO)
         destino.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(origen, destino)
-    datos = json.loads((RAIZ_P00 / "documentacion" / "datos_portada.json").read_text(encoding="utf-8"))
-    (DIST / "LEEME.txt").write_text(
-        f"Trial Steer {datos['VERSION']}\n\n"
-        "Abrir Trial_Steer.exe. Trial_Steer_consola.exe lo usa el programa para las corridas y no se abre a mano.\n"
-        "Requiere Windows, Assetto Corsa con Steam y el controlador vJoy instalados.\n"
-        "El programa encuentra solo la instalación del juego en las bibliotecas de Steam y crea steam_appid.txt si falta.\n"
-        "Solo si hay varias instalaciones hay que escribir la elegida en ruta_ac de P00_control_lateral/configs/juego_ac.json.\n"
-        "Las corridas se guardan en data/raw/p00/corridas dentro de esta carpeta.\n", encoding="utf-8")
-    salida = RAIZ_P00 / "documentacion" / "entrega" / f"Trial_Steer_v{datos['VERSION']}_windows.zip"
+    (DIST / "LEEME.txt").write_text(LEEME, encoding="utf-8-sig")
+    salida = DIR / "dist" / f"Trial_Steer_v{version.VERSION}_windows.zip"
     with zipfile.ZipFile(salida, "w", compression=zipfile.ZIP_DEFLATED) as z:
         for p in sorted(DIST.rglob("*")):
-            if p.is_file():
+            if p.is_file() and "__pycache__" not in p.parts:
                 z.write(p, Path("Trial_Steer") / p.relative_to(DIST))
+    # Copia para la entrega, solo si existe la carpeta de documentación del proyecto.
+    entrega = RAIZ_P00 / "documentacion" / "entrega"
+    if entrega.exists():
+        shutil.copy2(salida, entrega / salida.name)
     print(f"{len(archivos)} archivos de código copiados, ejecutable en {DIST}, "
           f"paquete {salida.name} de {salida.stat().st_size / 1e6:.0f} MB")
 

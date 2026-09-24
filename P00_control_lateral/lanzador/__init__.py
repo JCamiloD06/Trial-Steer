@@ -1,1 +1,1 @@
-"""Lanzador de corridas de P00. Herramienta para ejecutar el experimento, no aporte del artículo."""
+"""Lanzador de corridas de Trial Steer, interfaz gráfica y gestión de planes."""

@@ -8,7 +8,6 @@ Sin argumentos ese script es mpc_monza_Completo.py con la salvaguarda anti
 bloqueo del MPC longitudinal, decisión del investigador del 2026-09-16 después
 de que el original se quedara sin acelerar en pista.
 
-Herramienta para ejecutar el experimento del aim, no es aporte del artículo.
 La ventana no controla el vehículo. Arma el comando, ejecuta
 ejecutar_corrida.py como proceso aparte y muestra su salida, de modo que el
 ciclo de control de 50 ms no comparte proceso con la interfaz gráfica.
@@ -43,6 +42,7 @@ from lanzador import plan_piloto as mod_plan_pil
 from lanzador import plan_sintonia as mod_plan_sint  # noqa: E402
 from lanzador import proceso_consola  # noqa: E402
 from plataforma import procedencia  # noqa: E402
+import version  # noqa: E402
 
 SCRIPT = RAIZ_P00 / "ejecutar_corrida.py"
 CONFIG_BASE = RAIZ_P00 / "configs" / "base.json"
@@ -59,7 +59,7 @@ PREFIJO_MPC_GUARDADA = "Corrida guardada en:"
 class Lanzador(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Trial Steer")
+        self.title(version.NOMBRE)
         self.geometry("1180x860")
         self.proceso = None
         self.cola = queue.Queue()

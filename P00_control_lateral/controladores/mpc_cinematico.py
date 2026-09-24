@@ -1,5 +1,5 @@
 """
-MPC lateral con modelo bicicleta cinemático, sección 2.8 del manuscrito.
+MPC lateral con modelo bicicleta cinemático.
 
 Decisiones que implementa.
 

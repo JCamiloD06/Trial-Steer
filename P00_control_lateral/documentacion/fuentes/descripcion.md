@@ -8,7 +8,7 @@
 
 # 1. Información general del producto
 
-La Tabla [[tab:info]] resume los datos de identificación del software. Los valores técnicos se tomaron del código fuente y de la configuración del repositorio, verificados el 23 de septiembre de 2026.
+La Tabla [[tab:info]] resume los datos de identificación del software. Los valores técnicos se tomaron del código fuente y de la configuración de la versión registrada, Trial Steer v1.0.1, cuyo código fuente se congeló el 24 de septiembre de 2026.
 
 : Tabla [[tab:info]]. Información general del producto.
 
@@ -16,6 +16,7 @@ La Tabla [[tab:info]] resume los datos de identificación del software. Los valo
 |---|---|
 | Nombre | {{NOMBRE}} |
 | Versión | {{VERSION}} |
+| Código fuente congelado | 24 de septiembre de 2026 |
 | Tipo de producto | Software científico de escritorio |
 | Área de aplicación | Control automático de vehículos, seguimiento de trayectoria, simulación en tiempo real |
 | Autores | {{AUTORES}} |
@@ -47,16 +48,23 @@ La Figura [[fig:arquitectura]] muestra los componentes principales y el flujo de
 
 ### Requisitos para el usuario final
 
-El software se entrega como ejecutable para Windows, `Trial_Steer.exe`, que incluye el intérprete de Python y todas las librerías, de modo que el usuario final no necesita instalar Python. El software se ejecutó y verificó en un computador portátil con Windows 11 Home de 64 bits, procesador AMD Ryzen 5 5600H de 6 núcleos y 12 hilos, 7.3 GB de memoria y tarjeta gráfica NVIDIA GeForce GTX 1650. Esa es la única configuración verificada y se toma como referencia. El usuario necesita además los programas de la Tabla [[tab:req]].
+El software se entrega como ejecutable para Windows, `Trial_Steer.exe`, que incluye el intérprete de Python y todas las librerías, de modo que el usuario final no necesita instalar Python. El software se ejecutó y verificó en un computador portátil con Windows 11 Home de 64 bits, procesador AMD Ryzen 5 5600H de 6 núcleos y 12 hilos, 7.3 GB de memoria y tarjeta gráfica NVIDIA GeForce GTX 1650. Esa es la única configuración verificada y se toma como referencia. Para usar el ejecutable, el usuario final necesita los programas de la Tabla [[tab:req]]. Para ejecutar el software desde el código fuente se necesitan además los de la Tabla [[tab:req_fuente]].
 
-: Tabla [[tab:req]]. Programas necesarios para la operación con el simulador.
+: Tabla [[tab:req]]. Requisitos de ejecución para el usuario final.
 
 | Programa | Uso | Observación |
 |---|---|---|
+| Windows de 64 bits | Sistema operativo | Verificado en Windows 11 |
 | Steam y Assetto Corsa | Planta vehicular y fuente del estado | Programa comercial de Kunos Simulazioni, con la pista Monza y el vehículo Alfa Romeo Giulietta QV |
 | vJoy | Dispositivo de juego virtual que recibe dirección, acelerador y freno | Configurado como dispositivo 1 y asignado como control en el simulador |
+
+: Tabla [[tab:req_fuente]]. Requisitos adicionales para ejecutar desde el código fuente.
+
+| Programa | Uso | Observación |
+|---|---|---|
 | Python 3.14 | Intérprete | Verificado con la versión 3.14.7 |
 | numpy 2.5.3, scipy 1.18.1, osqp 1.1.3, pyvjoy 1.0.1 | Librerías | Versiones fijadas en requirements.txt |
+| matplotlib | Gráficas de la pestaña MPC completo | Versión fijada en requirements.txt |
 
 Cada corrida guardada ocupa entre 4.2 y 5.0 MB en disco, según las 36 corridas del primer bloque de la campaña medidas el 23 de septiembre de 2026. Una campaña de 90 vueltas requiere del orden de 450 MB.
 
@@ -70,7 +78,7 @@ El software opera en un solo equipo y no usa red. La comunicación con el simula
 
 ## 2.2. Justificación de los requisitos
 
-La dependencia de Windows viene de dos componentes externos. Assetto Corsa publica su estado en archivos de memoria compartida de Windows, y vJoy es un controlador de dispositivo para ese sistema operativo. El ciclo de control tiene un periodo nominal de 50 ms, fijado en `configs/base.json`, y el equipo debe ejecutar el simulador y el cálculo del controlador dentro de ese periodo. En las corridas de verificación del 15 de septiembre de 2026 se midió un periodo medio de 50.3 ms y tiempos de cómputo de los controladores por debajo de 0.9 ms, según `docs/STATE.md`, lo que deja margen en el equipo de referencia. La separación entre la ventana y el proceso de corrida evita que la interfaz gráfica compita con el ciclo de control dentro del mismo proceso.
+La dependencia de Windows viene de dos componentes externos. Assetto Corsa publica su estado en archivos de memoria compartida de Windows, y vJoy es un controlador de dispositivo para ese sistema operativo. El ciclo de control tiene un periodo nominal de 50 ms, fijado en `configs/base.json`, y el equipo debe ejecutar el simulador y el cálculo del controlador dentro de ese periodo. En las corridas de verificación del 15 de septiembre de 2026 se midió un periodo medio de 50.3 ms y tiempos de cómputo de los controladores por debajo de 0.9 ms, según la verificación de la plataforma, lo que deja margen en el equipo de referencia. La separación entre la ventana y el proceso de corrida evita que la interfaz gráfica compita con el ciclo de control dentro del mismo proceso.
 
 # 3. Objetivos y área de aplicación
 
@@ -84,7 +92,7 @@ El software se aplica en control automático, en investigación sobre seguimient
 
 # 4. Funcionalidades principales
 
-Las funcionalidades descritas en esta sección están implementadas en el código de `P00_control_lateral/`. La Tabla [[tab:func]] las agrupa por componente.
+Las funcionalidades descritas en esta sección están implementadas en el código de `P00_control_lateral/`. La Tabla [[tab:func]] las agrupa por componente. El directorio `P00_control_lateral` conserva la denominación histórica usada durante el desarrollo, cuando el software se escribió para el estudio P00 de comparación de controladores laterales, y se mantiene en la versión 1.0.1 por compatibilidad con la estructura del código, que calcula sus rutas a partir de ella.
 
 : Tabla [[tab:func]]. Funcionalidades principales y módulo que las implementa.
 
@@ -132,7 +140,7 @@ Cada módulo empieza con una descripción de su propósito y de las decisiones q
 
 ### Extensiones ya realizadas
 
-Durante el desarrollo se añadieron, sobre la versión inicial, la entrada progresiva de la dirección, la detección del cruce por posición normalizada, el abandono automático, la apertura del simulador desde el lanzador, las tandas encadenadas de sintonía, piloto y campaña, y el campo *Sesiones seguidas*. Cada cambio quedó registrado con su motivo en `docs/DECISIONS.md` y en `docs/P00_PLAN_CONTROLADORES.md`. La versión 1.0.1 añade el ejecutable para Windows, la detección automática de la instalación del juego en otro equipo, y corrige el nombre del archivo de configuración de los niveles de agarre 0.70 y 0.80 del plan del piloto, que perdía el punto de la extensión. La corrección conserva los archivos con el nombre anterior, de modo que el piloto ya corrido sigue encontrando su configuración.
+Durante el desarrollo se añadieron, sobre la versión inicial, la entrada progresiva de la dirección, la detección del cruce por posición normalizada, el abandono automático, la apertura del simulador desde el lanzador, las tandas encadenadas de sintonía, piloto y campaña, y el campo *Sesiones seguidas*. Cada cambio quedó registrado con su motivo en los registros de desarrollo del proyecto. La versión 1.0.1 añade el ejecutable para Windows, la detección automática de la instalación del juego en otro equipo, y corrige el nombre del archivo de configuración de los niveles de agarre 0.70 y 0.80 del plan del piloto, que perdía el punto de la extensión. La corrección conserva los archivos con el nombre anterior, de modo que el piloto ya corrido sigue encontrando su configuración.
 
 # 6. Robustez, desempeño y consistencia
 
@@ -149,17 +157,17 @@ El software incorpora varios mecanismos para que una falla no pierda datos ni de
 
 ## 6.2. Desempeño
 
-La Tabla [[tab:desemp]] reúne las mediciones de desempeño disponibles, con la fuente de cada una. Todas se obtuvieron en el equipo de referencia.
+La Tabla [[tab:desemp]] reúne las mediciones de desempeño disponibles, con la fuente de cada una. Todas se obtuvieron en el equipo de referencia. Las verificaciones de las fases de desarrollo están en los registros del proyecto de investigación, que no forman parte del paquete registrado.
 
 : Tabla [[tab:desemp]]. Mediciones de desempeño de la plataforma y su fuente.
 
 | Medición | Valor | Fuente |
 |---|---|---|
-| Periodo medio del ciclo en verificación | 50.3 ms | `docs/STATE.md`, fase 3, 15 de septiembre de 2026 |
-| Tiempo de cómputo de los controladores en verificación | por debajo de 0.9 ms | `docs/STATE.md`, fase 3 |
-| Batalla medida con los puntos de contacto | 2.633 m | `docs/STATE.md`, fase 3 |
+| Periodo medio del ciclo en verificación | 50.3 ms | Verificación de la plataforma, 15 de septiembre de 2026 |
+| Tiempo de cómputo de los controladores en verificación | por debajo de 0.9 ms | Verificación de la plataforma, 15 de septiembre de 2026 |
+| Batalla medida con los puntos de contacto | 2.633 m | Verificación de la plataforma, 15 de septiembre de 2026 |
 | Constante de la cadena de dirección | 0.403 rad, identificada con dos corridas | nota de `configs/base.json` |
-| Sobrevelocidad máxima con el PID congelado | 4.1 km/h | `docs/STATE.md`, 16 de septiembre de 2026 |
+| Sobrevelocidad máxima con el PID congelado | 4.1 km/h | Validación del PID en pista, 16 de septiembre de 2026 |
 | Tiempo máximo permitido al solucionador del MPC | 40 ms | `configs/base.json` |
 
 ## 6.3. Consistencia y reproducibilidad
@@ -177,7 +185,7 @@ La ventana no controla el vehículo. Arma el comando, prepara el simulador y lan
 El software trabaja con archivos locales y no transmite información. La integridad de los experimentos se apoya en estos mecanismos.
 
 * Cada corrida se guarda en una carpeta propia con un identificador que incluye fase, sesión, controlador, perfil, fecha y hora, de modo que una corrida nueva no sobrescribe otra.
-* El manifiesto guarda la huella SHA256 de la configuración, de cada archivo de código del software y de los dos archivos de origen de los que se copiaron piezas, y marca si alguno cambió desde la copia.
+* El manifiesto guarda la huella SHA256 de la configuración, de cada archivo de código del software y de los dos archivos de origen de los que provienen piezas integradas, y marca si alguno cambió desde su integración.
 * Los planes no se sobrescriben. Una corrida de campaña exige identificador de plan, y la interfaz exige ese identificador en las fases con plan.
 * Antes de escribir la plantilla de sesión en la carpeta de configuración del simulador, el software respalda la carpeta completa. El botón *Restaurar configuración del juego* copia de vuelta el último respaldo.
 * El análisis de campaña filtra las corridas por fase, de modo que las corridas de prueba no entran en el mapa de campaña.
@@ -197,12 +205,15 @@ La Tabla [[tab:dep]] separa la autoría de cada componente. Las librerías de Py
 | Componente | Origen | Relación con el software |
 |---|---|---|
 | Código de `P00_control_lateral/` | Obra original de los autores | Objeto del registro |
-| Lectura de memoria compartida, construcción de la trazada, generador de perfil, PID, conformador de pedal y salida a vJoy | Obra previa de los mismos autores, copiada el 15 de septiembre de 2026 desde `mpc_monza_Completo_barrido.py`, con huella registrada en `plataforma/procedencia.py` | Integrada, adaptada y ampliada |
+| Lectura de memoria compartida, construcción de la trazada, generador de perfil, PID, conformador de pedal y salida a vJoy | Módulos propios desarrollados previamente por los mismos autores en `mpc_monza_Completo_barrido.py`, integrados en Trial Steer el 15 de septiembre de 2026, con huella registrada en `plataforma/procedencia.py` | Integrados, reorganizados y ampliados |
 | Script `mpc_monza_Completo_barrido.py` y `scripts/08_graficas_corrida.py` | Obra previa de los mismos autores, ajena al estudio de los controladores | Se ejecutan sin modificación desde la pestaña *MPC completo* |
-| Campos ampliados de la página de física | Estructura declarada según la librería comunitaria mdjarv/assettocorsasharedmemory | Declaración de campos, sin código copiado de esa librería |
+| Campos ampliados de la página de física | Estructura declarada según la librería comunitaria mdjarv/assettocorsasharedmemory, licencia MIT | Declaración de campos, sin código copiado de esa librería, con atribución en TERCEROS.md |
+| Trazada `monza_fast_lane.csv` | Derivada del archivo `fast_lane.ai` de Monza incluido en Assetto Corsa, convertido con una herramienta propia | Dato de referencia, su geometría pertenece al juego |
 | Assetto Corsa y Steam | Kunos Simulazioni y Valve | Programas externos necesarios, no se distribuyen |
 | vJoy y pyvjoy | Terceros | Controlador de dispositivo y librería de acceso |
-| numpy, scipy, osqp | Terceros, licencias de código abierto | Librerías |
+| numpy, scipy, osqp, matplotlib | Terceros, licencias de código abierto | Librerías |
+
+Trial Steer no incluye ni reivindica propiedad sobre Assetto Corsa, sus vehículos, circuitos, recursos gráficos ni contenidos asociados. La trazada de Monza se obtuvo del archivo `fast_lane.ai` que trae el juego, convertido con una herramienta propia de los autores, y su geometría pertenece al juego. Las librerías de terceros conservan sus licencias. El archivo `P00_control_lateral/TERCEROS.md` detalla cada componente, su licencia y la atribución de la librería mdjarv/assettocorsasharedmemory, distribuida con licencia MIT.
 
 ## 9.3. Portabilidad
 
@@ -210,7 +221,7 @@ El código no fija rutas absolutas del repositorio, que se calculan a partir de 
 
 # 10. Documentación y soporte técnico
 
-El software se acompaña de este documento, del Manual técnico y del Manual de usuario. El archivo `P00_control_lateral/README.md` resume la estructura, la convención de signos y los comandos de uso. Cada módulo tiene una descripción inicial en el código. El registro de decisiones de implementación está en `docs/P00_PLAN_CONTROLADORES.md` y `docs/DECISIONS.md`.
+El software se acompaña de este documento, del Manual técnico y del Manual de usuario. El archivo `P00_control_lateral/README.md` resume la versión, los autores, la estructura, los requisitos, la convención de signos y los comandos de uso. `TERCEROS.md` declara los componentes de terceros y `LICENSE` la licencia. Cada módulo tiene una descripción inicial en el código. Las decisiones de implementación que citan algunos comentarios del código se registraron en la documentación de desarrollo del proyecto de investigación, que no forma parte del paquete.
 
 ### Soporte técnico
 
@@ -228,10 +239,10 @@ Las pruebas automáticas se ejecutaron el 24 de septiembre de 2026 en el equipo 
 | `prueba_humo.py` | Proyección, perfil escalado, respuesta de los tres controladores en recta y en círculo, entrada progresiva, límites, signo de vJoy, ejes por contactos, cruce de meta y registro | 21 de 21 |
 | `prueba_juego_ac.py` | Plantilla de sesión, escalado del botón, respaldo, restauración, posición de salida, huellas y detección de la instalación del juego | 25 de 25 |
 | `prueba_lanzador.py` | Plan de campaña con semilla, estado del plan, resumen, verificación, construcción de la ventana y sus pestañas, tandas e identificador de plan | 17 de 17 |
-| `prueba_mapa_campana.py` | Corrección de Holm, intervalo bootstrap, Friedman, Wilcoxon, umbral de mejora, esfuerzo y factibilidad | 26 de 26 |
+| `prueba_mapa_campana.py` | Corrección de Holm, intervalo bootstrap, Friedman, Wilcoxon, umbral de mejora, etiquetas de equivalencia y degradación, esfuerzo y factibilidad | 27 de 27 |
 | `prueba_plan_piloto.py` | Plan del piloto por bloques, escalera de agarre y nombre de los archivos por nivel | 28 de 28 |
 | `prueba_plan_sintonia.py` | Plan de sintonía con semilla y rangos | 14 de 14 |
-| Total | | 143 de 143 |
+| Total | | 144 de 144 |
 
 [[INCLUIR:pruebas_interfaz]]
 

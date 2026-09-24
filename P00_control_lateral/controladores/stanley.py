@@ -1,7 +1,7 @@
 """
-Stanley clásico, sección 2.7 del manuscrito, sin feedforward de curvatura.
+Stanley clásico, sin feedforward de curvatura.
 
-El manuscrito escribe δ igual a eψ más arctan de k e_y sobre v más ε, con los
+La formulación original escribe δ igual a eψ más arctan de k e_y sobre v más ε, con los
 errores definidos como trazada menos vehículo. En la convención de este
 paquete los errores son vehículo menos trazada, así que la misma ley queda
 δ igual a menos eψ menos arctan de k e_y sobre v más ε, con los errores del

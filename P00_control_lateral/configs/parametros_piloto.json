@@ -25,7 +25,7 @@
     "_nota_controladores": "Los tres, porque la variabilidad puede depender del controlador. Si difieren, se reporta por separado y el umbral de cada comparacion usa la del geometrico implicado."
   },
   "tiempo_limite": {
-    "_objetivo": "Decision 5.1. Fijar el tiempo limite de vuelta a partir de la duracion medida en el piloto, en lugar del valor provisional de 400 s puesto a ojo.",
+    "_objetivo": "Decision 5.1. Fijar el tiempo limite de vuelta a partir de la duracion medida en el piloto, en lugar del valor provisional de 400 s adoptado durante las pruebas iniciales.",
     "_regla": "Se calcula al cerrar el piloto como el doble de la mediana del tiempo de vuelta del perfil mas lento, redondeado hacia arriba a multiplo de 10 s. No se decide en caliente.",
     "_bloque_anadido": "2026-09-19. El plan original no incluia el perfil conservador, que es el mas lento de los tres, asi que la regla no era aplicable con datos del piloto. Se anade un bloque de tres vueltas, una por controlador, en perfil conservador y con el agarre ya fijado. Decision del investigador, alternativa descartada fue aplicar la regla con las vueltas de verificacion, que usan otros parametros.",
     "perfil": "conservador",

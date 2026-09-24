@@ -12,6 +12,7 @@ import os
 import platform
 import time
 
+import version
 from plataforma import procedencia
 
 COLUMNAS = [
@@ -44,7 +45,8 @@ COLUMNAS = [
 
 
 def _versiones():
-    v = {"python": platform.python_version(), "plataforma": platform.platform()}
+    v = {"software": f"{version.NOMBRE} {version.VERSION}", "python": platform.python_version(),
+         "plataforma": platform.platform()}
     for nombre in ("numpy", "scipy", "osqp", "pyvjoy"):
         try:
             modulo = __import__(nombre)

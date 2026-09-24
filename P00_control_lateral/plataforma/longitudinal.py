@@ -4,8 +4,8 @@ Rama longitudinal común, PID y conformador de pedal.
 Copias de PIDLongitudinalController y PedalShaper de
 mpc_monza_Completo_barrido.py, sin cambios de lógica. El comando vive entre
 menos uno y uno, positivo acelerador y negativo freno. Las ganancias del PID
-no están sintonizadas y se fijan en la caracterización longitudinal previa a
-la campaña, sección 2.5 del manuscrito.
+se fijaron el 2026-09-16 con la regla SIMC sobre una planta identificada con
+telemetría y están en longitudinal de configs/base.json.
 """
 import numpy as np
 

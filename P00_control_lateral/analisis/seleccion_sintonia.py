@@ -143,7 +143,7 @@ def main():
         if ganadora:
             print(f"  GANADORA {ganadora['id_plan']} con {ganadora['parametros']}, "
                   f"RMSE {ganadora['rmse_e_y_m']:.3f} m, razón {ganadora['razon_esfuerzo']:.2f}")
-            # Aviso de borde de rango, para declararlo en el manuscrito.
+            # Aviso de borde de rango, para declararlo como limitación de la sintonía.
             for nombre, valor in ganadora["parametros"].items():
                 r = rangos["controladores"][controlador].get(nombre)
                 if not r or not isinstance(valor, (int, float)):

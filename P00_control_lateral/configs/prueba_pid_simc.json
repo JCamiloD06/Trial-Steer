@@ -101,7 +101,7 @@
   },
   "metricas": {
     "punto_error_lateral": "cg",
-    "_nota": "Punto del vehiculo para la metrica primaria PENDIENTE de decision. Se calculan cg y eje trasero."
+    "_nota": "Configuracion historica de la validacion del PID longitudinal, anterior al cierre de la metrica. En la version 1.0.1 el punto de la metrica principal es cg, fijado en configs/base.json. Se conserva solo como registro de la sintonia del PID."
   },
   "salida": {
     "directorio_corridas": "data/raw/p00/corridas"

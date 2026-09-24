@@ -1,5 +1,5 @@
 """
-Pure Pursuit clásico, sección 2.6 del manuscrito.
+Pure Pursuit clásico.
 
 Ld igual a L0 más kv por v. El punto objetivo es el punto de la trazada a
 distancia Ld del eje trasero, avanzando desde su proyección. α es el ángulo

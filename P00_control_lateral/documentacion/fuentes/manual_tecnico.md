@@ -14,11 +14,11 @@
 
 ## 1.2. Contexto de desarrollo
 
-{{PROYECTO}} El software se escribió para ejecutar un estudio que compara Pure Pursuit, Stanley y un control predictivo basado en modelo con modelo bicicleta cinemático, en función de la velocidad y de la curvatura, con el circuito de Monza y el Alfa Romeo Giulietta QV de Assetto Corsa. Varias piezas de la plataforma, la lectura de memoria compartida, la construcción de la trazada, el generador de perfil de velocidad, el PID, el conformador de pedal y la salida a vJoy, provienen de un script previo de los mismos autores, `Model Predictive Control/Python/mpc_monza_Completo_barrido.py`, escrito para pruebas anteriores ajenas a ese estudio. Esas piezas se copiaron el 15 de septiembre de 2026, se adaptaron y se ampliaron, y la huella del archivo de origen queda registrada en `plataforma/procedencia.py`.
+{{PROYECTO}} El software se escribió para ejecutar un estudio que compara Pure Pursuit, Stanley y un control predictivo basado en modelo con modelo bicicleta cinemático, en función de la velocidad y de la curvatura, con el circuito de Monza y el Alfa Romeo Giulietta QV de Assetto Corsa. Varias piezas de la plataforma, la lectura de memoria compartida, la construcción de la trazada, el generador de perfil de velocidad, el PID, el conformador de pedal y la salida a vJoy, provienen de un script previo de los mismos autores, `Model Predictive Control/Python/mpc_monza_Completo_barrido.py`, escrito para pruebas anteriores ajenas a ese estudio. Esos módulos propios se integraron en Trial Steer el 15 de septiembre de 2026, donde se reorganizaron, adaptaron y ampliaron, y la huella del archivo de origen queda registrada en `plataforma/procedencia.py`.
 
 ## 1.3. Alcance del documento
 
-Este manual describe la arquitectura, los componentes, los modelos y ecuaciones implementados, los métodos numéricos, el lazo de tiempo real, la gestión de experimentos, el análisis, los formatos de almacenamiento, las limitaciones y el despliegue. Todo lo descrito corresponde al código de `P00_control_lateral/` verificado el 23 de septiembre de 2026. Los nombres de archivos, clases, funciones y parámetros son los del código. El uso de la interfaz se describe en el Manual de usuario.
+Este manual describe la arquitectura, los componentes, los modelos y ecuaciones implementados, los métodos numéricos, el lazo de tiempo real, la gestión de experimentos, el análisis, los formatos de almacenamiento, las limitaciones y el despliegue. Todo lo descrito corresponde a la versión registrada, Trial Steer v1.0.1, cuyo código fuente se congeló el 24 de septiembre de 2026. El directorio `P00_control_lateral` conserva la denominación histórica usada durante el desarrollo, cuando el software se escribió para el estudio P00 de comparación de controladores laterales, y se mantiene en la versión 1.0.1 por compatibilidad con la estructura del código, que calcula sus rutas a partir de ella. Los nombres de archivos, clases, funciones y parámetros son los del código. El uso de la interfaz se describe en el Manual de usuario.
 
 # 2. Arquitectura del sistema
 
@@ -107,7 +107,7 @@ El script previo de la pestaña *MPC completo* solo guarda su corrida cuando rec
 
 ### 3.2.1. memoria_ac.py
 
-La clase `MemoriaAC` abre las páginas de memoria compartida de física, gráficos y datos estáticos del simulador. Intenta primero una estructura de física ampliada que añade los puntos de contacto de las llantas, la velocidad angular local y otros campos. La declaración de esos campos sigue la librería comunitaria mdjarv/assettocorsasharedmemory y el código la marca como no verificada para la versión 1.16.4 del simulador, por lo que cada lectura se comprueba antes de usarse. `construir_estado` arma un `EstadoVehiculo` con la posición, la orientación de la carrocería, la velocidad, las posiciones de los ejes, la batalla medida y banderas de validez.
+La clase `MemoriaAC` abre las páginas de memoria compartida de física, gráficos y datos estáticos del simulador. Intenta primero una estructura de física ampliada que añade los puntos de contacto de las llantas, la velocidad angular local y otros campos. La declaración de esos campos sigue el orden, los nombres y los tipos del archivo Physics.cs de la librería comunitaria mdjarv/assettocorsasharedmemory, distribuida con licencia MIT, sin copiar su código, y la atribución está en `TERCEROS.md`. El código la marca como no verificada para la versión 1.16.4 del simulador, por lo que cada lectura se comprueba antes de usarse. `construir_estado` arma un `EstadoVehiculo` con la posición, la orientación de la carrocería, la velocidad, las posiciones de los ejes, la batalla medida y banderas de validez.
 
 ### 3.2.2. trazada.py
 
@@ -361,7 +361,7 @@ y la tasa de dirección se calcula como la diferencia de ángulos aplicados entr
 
 ## 8.2. Mapa de campaña y pruebas estadísticas
 
-`mapa_campana.py` agrupa las vueltas de una fase por perfil y región, tres por tres, con la vuelta como unidad de análisis. Implementa la prueba de Friedman sobre los tres controladores con la sesión como bloque, la prueba de Wilcoxon pareada del MPC contra cada geométrico, la corrección de Holm en dos familias de nueve celdas y un intervalo bootstrap del 95 por ciento de la diferencia que remuestrea sesiones completas. Como tamaño del efecto de cada contraste de Wilcoxon calcula la correlación biserial de rangos para pares emparejados. El criterio del mapa tiene tres capas, factibilidad, decisión de mejora con el umbral leído del piloto y esfuerzo reportado con bandas de 1.5 y 3 para la razón de tasas de dirección. Ningún umbral se decide en el código, todos se leen de la configuración y de la salida del piloto.
+`mapa_campana.py` agrupa las vueltas de una fase por perfil y región, tres por tres, con la vuelta como unidad de análisis. Implementa la prueba de Friedman sobre los tres controladores con la sesión como bloque, la prueba de Wilcoxon pareada del MPC contra cada geométrico, la corrección de Holm en dos familias de nueve celdas y un intervalo bootstrap del 95 por ciento de la diferencia que remuestrea sesiones completas. Como tamaño del efecto de cada contraste de Wilcoxon calcula la correlación biserial de rangos para pares emparejados. Cada comparación queda etiquetada como mejora práctica, calificada por el esfuerzo de dirección, como equivalencia práctica cuando la diferencia queda dentro del umbral en los dos sentidos, como degradación práctica cuando la diferencia adversa supera el umbral, o como no evaluable. El criterio del mapa tiene tres capas, factibilidad, decisión de mejora con el umbral leído del piloto y esfuerzo reportado con bandas de 1.5 y 3 para la razón de tasas de dirección. Ningún umbral se decide en el código, todos se leen de la configuración y de la salida del piloto.
 
 ## 8.3. Gráficas
 
@@ -402,6 +402,7 @@ Todos los parámetros que gobiernan una corrida están en dos archivos JSON y ni
 * Parte de la estructura de física ampliada y el orden de las ruedas están marcados como no verificados en el código. Las lecturas se comprueban antes de usarse.
 * El signo del eje de guiñada local del simulador no está verificado, por lo que la reidentificación de la constante de dirección usa el valor absoluto de la pendiente.
 * El clic sobre el menú del simulador usa coordenadas de la ventana y puede fallar al reabrir el juego. En ese caso el lanzador espera hasta 120 s a que el usuario pulse el volante del menú.
+* Assetto Corsa, Steam, vJoy y las librerías de Python son de terceros y no forman parte de la obra. La trazada de Monza deriva del archivo `fast_lane.ai` del juego. Ver `TERCEROS.md`.
 * La presencia de Custom Shaders Patch puede cambiar el clima y la temperatura de pista fijados por la plantilla. El software lo registra pero no lo impide.
 
 # 12. Despliegue

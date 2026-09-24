@@ -1,10 +1,11 @@
 """
-Métricas por vuelta y por región de curvatura, Tabla 3 del manuscrito y decisión 1.
+Métricas por vuelta y por región de curvatura.
 
 Solo usa los ciclos de la vuelta medida, fase medida, decisión I7. La región
 de cada ciclo sale de la curvatura en la proyección de la posición de Assetto
-Corsa. El error lateral se calcula en esa posición y en el eje trasero, porque
-el punto de la métrica primaria está PENDIENTE de decisión.
+Corsa. El error lateral se calcula en esa posición, que es la métrica principal
+según metricas.punto_error_lateral de configs/base.json, y en el eje trasero,
+que se usa como chequeo de robustez.
 
 Escribe metricas.json dentro de la carpeta de cada corrida.
 
