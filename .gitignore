@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+
+# Temporales de Windows y de Office
+desktop.ini
+Thumbs.db
+~$*
+*.tmp
+*.bak
+
+# Salidas que el software escribe al usarse. Son datos de estudio, no código.
+data/
+results/
+figures/
+tables/
+logs/
+P00_control_lateral/sintonia_pid/
+P00_control_lateral/sintonia_fase4/
+P00_control_lateral/piloto_fase5/
+P00_control_lateral/resultados_campana/
+
+# Planes generados por el lanzador con semilla. Cada estudio genera los suyos.
+P00_control_lateral/configs/plan_campana.json
+P00_control_lateral/configs/plan_piloto.json
+P00_control_lateral/configs/plan_sintonia.json
+P00_control_lateral/configs/sintonia/
+P00_control_lateral/configs/piloto/
+
+# Salidas intermedias de la documentación
+P00_control_lateral/documentacion/revision_pdf/
+P00_control_lateral/documentacion/entrega/
