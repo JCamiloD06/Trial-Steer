@@ -10,7 +10,7 @@ Es el programa encargado de la ejecución de pruebas del proyecto integral Volan
 
 ## Autores
 
-Francisco Javier Burgos Flórez, Juan Camilo Díaz López y Jesus Alberto Lastra Robles.
+Francisco Javier Burgos Flórez, Juan Camilo Díaz López y Jesús Alberto Lastra Robles.
 Programa de Ingeniería Mecatrónica, Universidad Nacional de Colombia, Sede La Paz.
 Contacto, jdiazlop@unal.edu.co y jlastrar@unal.edu.co.
 

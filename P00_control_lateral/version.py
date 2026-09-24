@@ -8,4 +8,4 @@ del ejecutable y el empaquetado del código fuente.
 NOMBRE = "Trial Steer"
 VERSION = "1.0.1"
 FECHA_CONGELAMIENTO = "2026-09-24"
-AUTORES = ("Francisco Javier Burgos Flórez", "Juan Camilo Díaz López", "Jesus Alberto Lastra Robles")
+AUTORES = ("Francisco Javier Burgos Flórez", "Juan Camilo Díaz López", "Jesús Alberto Lastra Robles")

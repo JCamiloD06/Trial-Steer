@@ -6,7 +6,7 @@ Versión registrada Trial Steer v1.0.1, código fuente congelado el 24 de septie
 
 ## Autores
 
-Francisco Javier Burgos Flórez, Juan Camilo Díaz López y Jesus Alberto Lastra Robles.
+Francisco Javier Burgos Flórez, Juan Camilo Díaz López y Jesús Alberto Lastra Robles.
 Programa de Ingeniería Mecatrónica, Universidad Nacional de Colombia, Sede La Paz.
 Contacto, jdiazlop@unal.edu.co y jlastrar@unal.edu.co.
 Repositorio, https://github.com/JCamiloD06/Trial-Steer
