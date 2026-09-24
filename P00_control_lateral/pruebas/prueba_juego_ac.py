@@ -83,6 +83,41 @@ def main():
     verificar("Salida cerca del salto de 1 a 0",
               juego_ac.cerca_de_salida(0.001, 0.0, dict(cfg, posicion_salida=0.999)))
 
+    # Detección de la instalación en otro equipo, añadida el 2026-09-24. Se simulan las
+    # bibliotecas de Steam con carpetas temporales, sin tocar la instalación real.
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        juego1, juego2 = tmp / "lib1" / "assettocorsa", tmp / "lib2" / "assettocorsa"
+        for j in (juego1, juego2):
+            j.mkdir(parents=True)
+            (j / "acs.exe").write_bytes(b"")
+        original = juego_ac.buscar_instalaciones
+        try:
+            juego_ac.buscar_instalaciones = lambda: [juego1]
+            c1 = juego_ac.resolver_rutas(dict(cfg, ruta_ac=str(tmp / "no_existe")))
+            verificar("Con una instalación en Steam se usa esa", c1["ruta_ac"] == str(juego1)
+                      and c1["_ruta_ac_origen"].startswith("detectada"), c1["_ruta_ac_origen"])
+            c0 = juego_ac.resolver_rutas(dict(cfg, ruta_ac=str(juego2)))
+            verificar("Una ruta configurada que existe se respeta", c0["ruta_ac"] == str(juego2)
+                      and c0["_ruta_ac_origen"] == "configuración")
+            juego_ac.buscar_instalaciones = lambda: [juego1, juego2]
+            c2 = juego_ac.resolver_rutas(dict(cfg, ruta_ac=str(tmp / "no_existe")))
+            try:
+                juego_ac.comprobar_instalacion(c2)
+                verificar("Con varias instalaciones se pide elegir", False)
+            except juego_ac.ErrorJuego as e:
+                verificar("Con varias instalaciones se pide elegir",
+                          str(juego1) in str(e) and str(juego2) in str(e) and c2["ruta_ac"] == str(tmp / "no_existe"))
+        finally:
+            juego_ac.buscar_instalaciones = original
+        juego_ac.comprobar_instalacion(c1)
+        appid = juego1 / "steam_appid.txt"
+        verificar("Se crea steam_appid.txt si falta", appid.exists()
+                  and appid.read_text(encoding="utf-8").strip() == cfg["steam_appid"])
+        c3 = juego_ac.resolver_rutas(dict(cfg, directorio_cfg_juego=str(tmp / "sin_cfg")))
+        verificar("La carpeta cfg se busca en Documentos si la configurada no existe",
+                  c3["_dir_cfg_origen"] in ("configuración", "detectada en Documentos"), str(c3["_dir_cfg_juego"]))
+
     ayuda = subprocess.run([sys.executable, str(RAIZ_P00 / "ejecutar_corrida.py"), "--help"],
                            capture_output=True, text=True, encoding="utf-8", errors="replace").stdout
     verificar("El bucle de corrida acepta la información de sesión", "--info-sesion-ac" in ayuda)

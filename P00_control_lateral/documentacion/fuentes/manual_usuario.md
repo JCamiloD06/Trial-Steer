@@ -1,23 +1,4 @@
-::: {custom-style="Title"}
-{{NOMBRE}}
-:::
-
-::: {custom-style="Subtitle"}
-Manual de usuario del programa
-:::
-
-::: {custom-style="Cubierta"}
-{{SUBTITULO}}
-:::
-
-| | |
-|---|---|
-| Autores | {{AUTORES}} |
-| Versión | {{VERSION}} |
-| Fecha | {{FECHA}} |
-| Afiliación institucional | {{AFILIACION}} |
-| Contacto | {{CONTACTO}} |
-| Repositorio | {{REPOSITORIO}} |
+[[PORTADA]]
 
 [[SALTO]]
 
@@ -84,12 +65,22 @@ El software se verificó en un portátil con procesador AMD Ryzen 5 5600H, 7.3 G
 
 ## 3.3. Instalación y ejecución del programa
 
+Con el ejecutable, que no requiere instalar Python.
+
+1. Instale Steam, Assetto Corsa y vJoy.
+2. Descomprima `Trial_Steer_v{{VERSION}}_windows.zip` en una carpeta con permiso de escritura, por ejemplo Documentos.
+3. Abra `Trial_Steer.exe`. El archivo `Trial_Steer_consola.exe` lo usa el programa para las corridas y no se abre a mano.
+
+Las corridas quedan en `Trial_Steer/data/raw/p00/corridas`.
+
+El programa encuentra solo la instalación de Assetto Corsa. Si la ruta de `configs/juego_ac.json` no existe en su equipo y en las bibliotecas de Steam hay una sola instalación, usa esa. También crea el archivo `steam_appid.txt` en la carpeta del juego si falta, sin el cual Steam abriría su lanzador oficial, y busca la carpeta de configuración del juego en Documentos aunque esté en OneDrive. Solo hay que editar `ruta_ac` en `juego_ac.json` cuando hay varias instalaciones del juego, caso en el que el programa muestra cuáles encontró, o cuando Windows no permite crear `steam_appid.txt`, caso en el que se crea a mano con el número 244210.
+
+Desde el código fuente, con Python instalado.
+
 1. Instale Steam, Assetto Corsa y vJoy.
 2. Instale Python 3.14.
 3. Abra una terminal en la raíz del repositorio y ejecute `python -m pip install -r P00_control_lateral/requirements.txt`.
-4. Compruebe que la carpeta del juego contiene el archivo `steam_appid.txt` con el número 244210. Sin él, Steam abre el lanzador oficial del juego en lugar de la sesión.
-5. Revise en `P00_control_lateral/configs/juego_ac.json` que la ruta del juego es la de su equipo.
-6. Ejecute `python P00_control_lateral/abrir_lanzador.py` desde la raíz del repositorio.
+4. Ejecute `python P00_control_lateral/abrir_lanzador.py` desde la raíz del repositorio.
 
 ## 3.4. Configuración de vJoy en el simulador
 
@@ -209,7 +200,7 @@ Procedimiento.
 
 ![Figura [[fig:resumen]]. Resumen de la corrida del experimento 1.](capturas/05_resumen_corrida.png){width=15.5cm}
 
-Resultados. [RESULTADO PENDIENTE DE EJECUCIÓN]
+Resultados. [[INCLUIR:exp1]]
 
 Archivos. La carpeta de la corrida contiene `telemetria.csv`, `perfil.csv` y `manifiesto.json`.
 
@@ -221,7 +212,7 @@ Configuración. Igual al experimento 1 con controlador stanley y etiqueta doc_st
 
 Procedimiento. Repita los pasos del experimento 1 cambiando solo *Controlador* y *Etiqueta*.
 
-Resultados. [RESULTADO PENDIENTE DE EJECUCIÓN]
+Resultados. [[INCLUIR:exp2]]
 
 ## 6.3. Experimento 3, corrida con el MPC cinemático
 
@@ -231,7 +222,7 @@ Configuración. Igual al experimento 1 con controlador mpc_cinematico y etiqueta
 
 Procedimiento. Repita los pasos del experimento 1. En el registro del MPC, la columna `ctrl_estado` guarda el estado del solucionador, `ctrl_iteraciones` las iteraciones, `ctrl_respaldo` si se usó la secuencia anterior, `ctrl_extra1` el tiempo del solucionador en milisegundos y `ctrl_extra2` el valor del costo.
 
-Resultados. [RESULTADO PENDIENTE DE EJECUCIÓN]
+Resultados. [[INCLUIR:exp3]]
 
 ## 6.4. Experimento 4, comparación de controladores
 
@@ -242,7 +233,7 @@ Procedimiento.
 1. Ejecute `metricas_vuelta.py` sobre cada una de las tres carpetas.
 2. Compare en cada `metricas.json` el error cuadrático medio del error lateral de la vuelta y de cada región, el tiempo de vuelta y la tasa de dirección.
 
-Resultados. [RESULTADO PENDIENTE DE EJECUCIÓN]
+Resultados. [[INCLUIR:exp4]]
 
 Interpretación. Es una demostración de uso con una vuelta por controlador, sin valor inferencial.
 
@@ -254,7 +245,7 @@ Configuración. Igual al experimento 2 con perfil nominal y etiqueta doc_st_nomi
 
 Procedimiento. Corra la vuelta, calcule sus métricas y compárelas con las del experimento 2.
 
-Resultados. [RESULTADO PENDIENTE DE EJECUCIÓN]
+Resultados. [[INCLUIR:exp5]]
 
 ## 6.6. Experimento 6, verificación de la plataforma
 
@@ -266,7 +257,7 @@ La pestaña revisa el vehículo leído, la disponibilidad de la física ampliada
 
 ![Figura [[fig:verif]]. Pestaña Verificación fase 3 con la evaluación de la corrida del experimento 1.](capturas/09_verificacion_fase3.png){width=15.5cm}
 
-Resultados. [RESULTADO PENDIENTE DE EJECUCIÓN]
+Resultados. [[INCLUIR:exp6]]
 
 # 7. Visualización de resultados
 
@@ -294,7 +285,8 @@ La Tabla [[tab:problemas]] reúne los problemas conocidos, observados durante el
 
 | Síntoma | Causa | Solución |
 |---|---|---|
-| Se abre el lanzador oficial de Steam en lugar de la sesión | Falta `steam_appid.txt` en la carpeta del juego | Crear el archivo con el número 244210. El lanzador oficial reescribe la configuración del juego, que puede restaurarse con *Restaurar configuración del juego* con el juego cerrado |
+| Mensaje de que no se encuentra acs.exe | Hay varias instalaciones del juego o ninguna en las bibliotecas de Steam | Escribir en `ruta_ac` de `configs/juego_ac.json` la carpeta que contiene acs.exe. El mensaje lista las instalaciones encontradas |
+| Se abre el lanzador oficial de Steam en lugar de la sesión | Falta `steam_appid.txt` en la carpeta del juego y Windows no permitió crearlo | Crear el archivo con el número 244210. El lanzador oficial reescribe la configuración del juego, que puede restaurarse con *Restaurar configuración del juego* con el juego cerrado |
 | El juego queda en el menú de boxes | El juego espera el botón del volante del menú | El lanzador lo pulsa. Si el clic no entra, la salida muestra PULSA TÚ EL VOLANTE y el usuario tiene 120 s para pulsarlo |
 | Mensaje de que el carro no está en la salida | La sesión abierta no está en la posición de salida | Aceptar la opción de cerrar y reabrir el juego que ofrece la ventana |
 | vJoy no controla el carro | vJoy no está instalado, no es el dispositivo 1 o no está asignado en el juego | Revisar la instalación de vJoy y la plantilla de controles |

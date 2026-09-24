@@ -117,14 +117,14 @@ def tabla_parametros():
     return t
 
 
-# ---------------------------------------------------------------- tabla 5
+# ---------------------------------------------------------------- tabla 6
 def tabla_sintonia():
     """Rangos explorados, descartes y configuración adoptada por controlador."""
     sel = cargar_json(SEL_SINTONIA)
     if sel is None:
-        return saltar(5, f"no existe {relativa(SEL_SINTONIA)}")
+        return saltar(6, f"no existe {relativa(SEL_SINTONIA)}")
     rangos = cargar_json(RANGOS) or {}
-    t = Tabla(5, "sintonia_fase4",
+    t = Tabla(6, "sintonia_fase4",
               "Resultado de la tanda de sintonía. Veinte configuraciones por controlador, "
               "muestreadas al azar con semilla fija dentro de rangos declarados antes de correr.",
               ["Controlador", "Rango explorado", "Evaluadas", "Candidatas", "Descartadas",
@@ -150,13 +150,13 @@ def tabla_sintonia():
     return t
 
 
-# ---------------------------------------------------------------- tabla 6
+# ---------------------------------------------------------------- tabla 7
 def tabla_repetibilidad():
     """Repetibilidad del piloto y umbral de mejora práctica que de ahí sale."""
     rep = cargar_json(REPETIBILIDAD)
     if rep is None:
-        return saltar(6, f"no existe {relativa(REPETIBILIDAD)}")
-    t = Tabla(6, "repetibilidad_piloto",
+        return saltar(7, f"no existe {relativa(REPETIBILIDAD)}")
+    t = Tabla(7, "repetibilidad_piloto",
               "Repetibilidad medida en la fase piloto y umbral de mejora práctica adoptado "
               "para cada comparación, declarado antes de la campaña.",
               ["Controlador", "n", "RMSE medio en m", "σ en m", "IC 95 por ciento de σ en m",
@@ -173,7 +173,7 @@ def tabla_repetibilidad():
     return t
 
 
-# ---------------------------------------------------------------- tabla 7
+# ---------------------------------------------------------------- tabla 5
 def tabla_verificacion():
     """Cumplimiento de la plataforma sobre las corridas de fase verificacion."""
     carpetas = sorted(CORRIDAS.glob("verificacion_*")) if CORRIDAS.exists() else []
@@ -183,9 +183,9 @@ def tabla_verificacion():
         if datos is not None:
             manifiestos.append(datos)
     if not manifiestos:
-        return saltar(7, "no hay corridas de fase verificacion con manifiesto")
+        return saltar(5, "no hay corridas de fase verificacion con manifiesto")
 
-    t = Tabla(7, "verificacion_plataforma",
+    t = Tabla(5, "verificacion_plataforma",
               "Verificación de la plataforma. Valores agregados sobre las corridas de fase "
               "verificacion, con el criterio fijado antes de medir.",
               ["Punto", "Criterio", "Valor observado", "Corridas que cumplen"])
@@ -292,8 +292,10 @@ def tabla_contrastes():
     return t
 
 
-TABLAS = {4: tabla_parametros, 5: tabla_sintonia, 6: tabla_repetibilidad,
-          7: tabla_verificacion, 8: tabla_campana, 9: tabla_contrastes}
+# El número sigue el orden de aparición en el manuscrito. Empieza en 4 porque
+# las tablas 1 a 3 son de diseño y no se generan desde datos.
+TABLAS = {4: tabla_parametros, 5: tabla_verificacion, 6: tabla_sintonia,
+          7: tabla_repetibilidad, 8: tabla_campana, 9: tabla_contrastes}
 
 
 def main():

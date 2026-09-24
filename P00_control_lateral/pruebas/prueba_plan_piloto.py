@@ -139,7 +139,17 @@ def main():
         except ValueError:
             verificar("no se añade antes de fijar el agarre", True)
 
-    fallas = [n for n, ok in RESULTADOS if not ok]
+        # Nombre del archivo de configuración por nivel, corregido el 2026-09-24.
+        vacia = tmp / "nombres"
+        vacia.mkdir()
+        nombres = [pp.ruta_config({"grip_usage_factor": n}, vacia).name for n in (0.7, 0.72, 0.8)]
+        verificar("los archivos por nivel terminan en .json", nombres == ["agarre_70.json", "agarre_72.json",
+                                                                          "agarre_80.json"], nombres)
+        (vacia / "agarre_8json").write_text("{}", encoding="utf-8")
+        verificar("se sigue usando un archivo con el nombre anterior",
+                  pp.ruta_config({"grip_usage_factor": 0.8}, vacia).name == "agarre_8json")
+
+    fallas =[n for n, ok in RESULTADOS if not ok]
     print(f"\n{len(RESULTADOS) - len(fallas)} de {len(RESULTADOS)} verificaciones correctas")
     if fallas:
         print("Fallas:", fallas)

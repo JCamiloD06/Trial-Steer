@@ -32,3 +32,7 @@ P00_control_lateral/configs/piloto/
 # Salidas intermedias de la documentación
 P00_control_lateral/documentacion/revision_pdf/
 P00_control_lateral/documentacion/entrega/
+
+# Construcción del ejecutable. El zip se publica en Releases, no en el repositorio.
+P00_control_lateral/empaquetado/dist/
+P00_control_lateral/empaquetado/build/

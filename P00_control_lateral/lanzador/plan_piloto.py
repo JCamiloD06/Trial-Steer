@@ -157,17 +157,32 @@ def escribir_config(corrida, config_base, dir_configs=DIR_CONFIGS):
     cfg["perfil"]["grip_usage_factor"] = float(nivel)
     dir_configs = Path(dir_configs)
     dir_configs.mkdir(parents=True, exist_ok=True)
-    ruta = dir_configs / f"agarre_{nivel:.2f}.json".replace("0.", "")
+    ruta = _ruta_agarre(dir_configs, nivel)
     with open(ruta, "w", encoding="utf-8") as f:
         json.dump(cfg, f, ensure_ascii=False, indent=2)
     return ruta
+
+
+def _ruta_agarre(dir_configs, nivel):
+    """
+    Archivo de configuración de un nivel de agarre, agarre_80.json para 0.80.
+
+    Corregido el 2026-09-24. El nombre anterior quitaba cada aparición de 0. y
+    en 0.70 y 0.80 también el punto de la extensión, agarre_7json y
+    agarre_8json. Si ya existe un archivo con el nombre anterior se sigue
+    usando, para que el plan del piloto ya corrido encuentre sus archivos.
+    """
+    dir_configs = Path(dir_configs)
+    nuevo = dir_configs / f"agarre_{round(float(nivel) * 100):02d}.json"
+    anterior = dir_configs / f"agarre_{nivel:.2f}.json".replace("0.", "")
+    return anterior if anterior.exists() and not nuevo.exists() else nuevo
 
 
 def ruta_config(corrida, dir_configs=DIR_CONFIGS):
     nivel = corrida["grip_usage_factor"]
     if nivel is None:
         return None
-    return Path(dir_configs) / f"agarre_{nivel:.2f}.json".replace("0.", "")
+    return _ruta_agarre(dir_configs, nivel)
 
 
 def nivel_aceptado(plan, resultados):

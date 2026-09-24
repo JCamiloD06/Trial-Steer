@@ -1,0 +1,109 @@
+{
+ "config": "C:\\Users\\Camilo\\AppData\\Local\\Temp\\ts_otro_equipo\\P00_control_lateral\\configs\\juego_ac.json",
+ "inicio": "2026-09-24T11:14:35",
+ "reinicio_pedido": true,
+ "pasos": [
+  {
+   "boton": "conducir",
+   "cliente": [
+    39,
+    139
+   ],
+   "pantalla": [
+    397,
+    275
+   ],
+   "ya_al_frente": true,
+   "alt": false
+  }
+ ],
+ "mods": {
+  "archivos": {
+   "dwrite.dll": false,
+   "extension": false
+  },
+  "csp_activo": false,
+  "sha256_dwrite": null,
+  "_nota": "dwrite.dll carga Custom Shaders Patch al abrir acs.exe, y con él Sol y Pure si están instalados. Renombrarlo lo desactiva sin desinstalar nada."
+ },
+ "rutas": {
+  "ruta_ac": "c:\\program files (x86)\\steam\\steamapps\\common\\assettocorsa",
+  "origen": "detectada en las bibliotecas de Steam",
+  "ruta_ac_configurada": "E:\\Juegos\\SteamLibrary\\steamapps\\common\\assettocorsa",
+  "dir_cfg_juego": "C:\\Users\\Camilo\\Documents\\Assetto Corsa\\cfg",
+  "origen_cfg": "configuración"
+ },
+ "cierre_s": 1.71,
+ "abierto_por_lanzador": true,
+ "plantilla": {
+  "archivos": {
+   "race.ini": {
+    "sha256_plantilla": "b2694c6f4f13c342eca357ec33981e41efa86717563f08f3554ab392f4d90d31",
+    "sha256_juego": "b2694c6f4f13c342eca357ec33981e41efa86717563f08f3554ab392f4d90d31",
+    "igual": true
+   },
+   "assists.ini": {
+    "sha256_plantilla": "8260b68e8dc56aa2ba1df57abc60eb739d43b96c8cfa52e29c3d6fc12bb918ad",
+    "sha256_juego": "8260b68e8dc56aa2ba1df57abc60eb739d43b96c8cfa52e29c3d6fc12bb918ad",
+    "igual": true
+   },
+   "controls.ini": {
+    "sha256_plantilla": "1aa2b2c3451155e987546f007fba9044dd3ace0c24260ac6280a4c5204b988a5",
+    "sha256_juego": "1aa2b2c3451155e987546f007fba9044dd3ace0c24260ac6280a4c5204b988a5",
+    "igual": true
+   },
+   "video.ini": {
+    "sha256_plantilla": "ac882b1bb3259cf6edaae2fa11da50991d9f9a62431369905918144ef0ddca8e",
+    "sha256_juego": "ac882b1bb3259cf6edaae2fa11da50991d9f9a62431369905918144ef0ddca8e",
+    "igual": true
+   }
+  },
+  "reescritos": [],
+  "respaldo": null
+ },
+ "carga_s": 10.02,
+ "assetto_corsa": {
+  "carModel": "alfa_romeo_giulietta_qv",
+  "track": "monza",
+  "acVersion": "1.16.4",
+  "lectura": "ok"
+ },
+ "tamano_cliente": [
+  819,
+  614
+ ],
+ "clic_automatico_ok": true,
+ "control": {
+  "freno_enviado": 0.3,
+  "lectura": {
+   "status": 2,
+   "packet": 3401,
+   "posicion": 0.856431782245636,
+   "v_kmh": 0.0008833972387947142,
+   "freno": 0.30000001192092896,
+   "volante": 0.0
+  },
+  "ok": true
+ },
+ "estado_final": {
+  "status": 2,
+  "packet": 3413,
+  "posicion": 0.856431782245636,
+  "v_kmh": 0.005824503488838673,
+  "freno": 0.30000001192092896,
+  "volante": 0.0
+ },
+ "fin": "2026-09-24T11:14:57",
+ "destino": "p00",
+ "registro": [
+  "11:14:35 Assetto Corsa detectado en c:\\program files (x86)\\steam\\steamapps\\common\\assettocorsa, la ruta de juego_ac.json no existe en este equipo",
+  "11:14:35 Cerrando Assetto Corsa",
+  "11:14:37 Juego cerrado en 1.71 s",
+  "11:14:37 La carpeta del juego ya coincide con la plantilla",
+  "11:14:37 Abriendo Assetto Corsa",
+  "11:14:41 Memoria compartida disponible",
+  "11:14:47 Sesión en vivo en 10.02 s",
+  "11:14:54 Clic en el volante del menú, intento 1, ventana ya al frente sí, Alt no",
+  "11:14:57 vJoy controla el carro, freno leído 0.30"
+ ]
+}

@@ -95,7 +95,14 @@ def metricas_grupo(d, m):
     }
 
 
-def procesar(carpeta, cfg):
+def procesar(carpeta, cfg, escribir=True):
+    """
+    Métricas de una corrida. escribir en falso deja el metricas.json que ya
+    hay en la carpeta y devuelve el resultado solo en memoria. Sirve para los
+    chequeos de robustez, que usan una configuración distinta de la base y no
+    deben dejar la caché de la corrida con valores que no son los del análisis
+    principal. Añadido el 2026-09-24.
+    """
     carpeta = Path(carpeta)
     with open(carpeta / "telemetria.csv", newline="", encoding="utf-8") as f:
         filas = [r for r in csv.DictReader(f) if r.get("fase_vuelta") == "medida"]
@@ -139,8 +146,9 @@ def procesar(carpeta, cfg):
         resultado["grupos"]["vuelta"] = metricas_grupo(d, np.ones(len(filas), dtype=bool))
         for nombre in ("baja", "media", "alta"):
             resultado["grupos"][nombre] = metricas_grupo(d, regiones == nombre)
-    with open(carpeta / "metricas.json", "w", encoding="utf-8") as f:
-        json.dump(resultado, f, indent=2, ensure_ascii=False)
+    if escribir:
+        with open(carpeta / "metricas.json", "w", encoding="utf-8") as f:
+            json.dump(resultado, f, indent=2, ensure_ascii=False)
     return resultado
 
 

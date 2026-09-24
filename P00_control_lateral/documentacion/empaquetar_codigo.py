@@ -31,7 +31,7 @@ RAIZ_REPO = RAIZ_P00.parent
 SALIDA = DIR / "entrega"
 
 EXCLUIR_CARPETAS = {"__pycache__", "documentacion", "piloto_fase5", "resultados_campana", "sintonia_fase4",
-                    "sintonia_pid"}
+                    "sintonia_pid", "dist", "build"}
 EXCLUIR_EN_CONFIGS = {"plan_campana.json", "plan_piloto.json", "plan_sintonia.json", "sintonia", "piloto"}
 # Obra previa de los mismos autores que el software usa desde su ruta original. La trazada la lee la
 # plataforma, el script de barrido lo ejecuta la pestaña MPC completo y su huella la compara procedencia.py,

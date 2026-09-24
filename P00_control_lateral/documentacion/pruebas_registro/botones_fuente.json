@@ -1,0 +1,164 @@
+{
+  "fecha": "2026-09-24 11:19",
+  "raiz": "C:\\Users\\Camilo\\Documents\\Volante TDG\\virtual_mpc_car\\P00_control_lateral",
+  "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+  "ejecutable": "C:\\Users\\Camilo\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+  "resultados": [
+    {
+      "control": "armado del comando en fase prueba",
+      "resultado": "ok",
+      "detalle": "C:\\Users\\Camilo\\Documents\\Volante TDG\\virtual_mpc_car\\P00_control_lateral\\ejecutar_corrida.py --controlador stanley --perfil conservador --sesion 0 --fase prueba --config C:\\Users\\Camilo\\Documents\\Volante TDG\\virtual_mpc_car\\P00_control_lateral\\configs\\base.json --tiempo-max-s 30"
+    },
+    {
+      "control": "validación del Id del plan en fase campana",
+      "resultado": "ok, exige"
+    },
+    {
+      "control": "validación del Id del plan en fase sintonia",
+      "resultado": "ok, exige"
+    },
+    {
+      "control": "validación del Id del plan en fase piloto",
+      "resultado": "ok, exige"
+    },
+    {
+      "control": "Prueba de controladores / Corrida / Elegir",
+      "resultado": "ok",
+      "dialogos": [
+        "askopenfilename, None, "
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Corrida / Iniciar corrida",
+      "resultado": "no se pulsa aquí, se prueba con el simulador"
+    },
+    {
+      "control": "Prueba de controladores / Corrida / Detener y guardar",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "Prueba de controladores / Corrida / Restaurar configuración del juego",
+      "resultado": "ok",
+      "dialogos": [
+        "showinfo, Restaurar, No hay respaldos. La plantilla nunca cambió la configuración del juego."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Plan de campaña / Usar seleccionada",
+      "resultado": "ok",
+      "dialogos": [
+        "askyesno, Repetir corrida, s01_p1 ya tiene 1 intento(s), estado completada. Según la decisión 5.2 ninguna vuelta se repite ni se descarta en silencio. Si repites, la corrida quedará etiqu"
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Plan de campaña / Correr la sesión",
+      "resultado": "ok",
+      "dialogos": [
+        "showinfo, Campaña, Todas las corridas del plan ya están hechas."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Plan de campaña / Usar siguiente",
+      "resultado": "ok",
+      "dialogos": [
+        "showinfo, Plan, No hay corridas pendientes o no hay plan."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Plan de campaña / Actualizar",
+      "resultado": "ok",
+      "dialogos": []
+    },
+    {
+      "control": "Prueba de controladores / Plan de campaña / Generar plan",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "Prueba de controladores / Tanda de sintonía / Iniciar tanda",
+      "resultado": "ok",
+      "dialogos": [
+        "showinfo, Tanda, Todas las corridas del plan ya están hechas."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Tanda de sintonía / Detener tanda",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "Prueba de controladores / Tanda de sintonía / Usar seleccionada",
+      "resultado": "ok",
+      "dialogos": [
+        "askyesno, Repetir corrida, sint_pure_pursuit_01 ya está como completada. Repetirla añade un intento y el análisis usa el último. ¿Continuar?"
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Tanda de sintonía / Actualizar",
+      "resultado": "ok",
+      "dialogos": []
+    },
+    {
+      "control": "Prueba de controladores / Tanda de sintonía / Generar plan",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "Prueba de controladores / Piloto / Iniciar tanda",
+      "resultado": "ok",
+      "dialogos": [
+        "showinfo, Piloto, No quedan corridas pendientes en el plan."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Piloto / Repetir seleccionada",
+      "resultado": "ok",
+      "dialogos": [
+        "askyesno, Repetir corrida, pil_ajuste_80_pure_pursuit está como completada. Repetirla añade un intento y el análisis usa el último. ¿Continuar?"
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Piloto / Actualizar",
+      "resultado": "ok",
+      "dialogos": []
+    },
+    {
+      "control": "Prueba de controladores / Piloto / Añadir bloque tiempo límite",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "Prueba de controladores / Piloto / Generar plan",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "Prueba de controladores / Verificación fase 3 / Evaluar",
+      "resultado": "ok",
+      "dialogos": []
+    },
+    {
+      "control": "Prueba de controladores / Verificación fase 3 / Actualizar lista",
+      "resultado": "ok",
+      "dialogos": []
+    },
+    {
+      "control": "MPC completo / Iniciar MPC completo",
+      "resultado": "no se pulsa aquí, se prueba con el simulador"
+    },
+    {
+      "control": "MPC completo / Activar MPC",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "MPC completo / Detener y guardar",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "MPC completo / Generar gráficas",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "rótulos de campos",
+      "resultado": "ok",
+      "detalle": "Fase, Controlador, Perfil, Sesión, Etiqueta, Id del plan, Tiempo máximo s, Configuración, No verificar vehículo, solo pruebas"
+    }
+  ],
+  "errores": [],
+  "archivos_de_configuracion_cambiados": []
+}

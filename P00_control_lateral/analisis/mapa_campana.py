@@ -54,7 +54,7 @@ def cargar_umbrales(ruta):
     return {g: v["umbral_m"] for g, v in d.get("umbrales", {}).items()}
 
 
-def recolectar(cfg, fase, perfiles, recalcular=False):
+def recolectar(cfg, fase, perfiles, recalcular=False, escribir_cache=True):
     """Métricas por vuelta de todas las corridas de la fase pedida."""
     directorio = procedencia.RAIZ_REPO / cfg["salida"]["directorio_corridas"]
     filas = []
@@ -68,7 +68,7 @@ def recolectar(cfg, fase, perfiles, recalcular=False):
             continue
         ruta_metricas = carpeta / "metricas.json"
         if recalcular or not ruta_metricas.exists():
-            m = metricas_vuelta.procesar(carpeta, cfg)
+            m = metricas_vuelta.procesar(carpeta, cfg, escribir=escribir_cache)
         else:
             m = json.load(open(ruta_metricas, encoding="utf-8"))
         filas.append({
@@ -106,6 +106,23 @@ def bootstrap_diferencia(pares, n=10000, semilla=0):
     return float(np.percentile(muestras, 2.5)), float(np.percentile(muestras, 97.5))
 
 
+def rango_biserial(dif):
+    """
+    Correlación biserial de rangos para pares emparejados, tamaño de efecto que
+    acompaña al contraste de Wilcoxon. Vale 1 cuando todas las sesiones van en
+    el sentido favorable al MPC y menos 1 cuando todas van en contra. Se pide
+    en la sección de análisis estadístico del manuscrito. Añadido el 2026-09-24.
+    """
+    a = np.asarray([d for d in dif if d != 0], dtype=float)
+    if a.size == 0:
+        return None
+    rangos = stats.rankdata(np.abs(a))
+    positivos = float(rangos[a > 0].sum())
+    negativos = float(rangos[a < 0].sum())
+    total = positivos + negativos
+    return float((positivos - negativos) / total) if total else None
+
+
 def holm(pvalores):
     """Corrección de Holm dentro de una familia. Devuelve los p ajustados."""
     if not pvalores:
@@ -121,14 +138,37 @@ def holm(pvalores):
     return ajustados
 
 
-def etiquetar(comp, razon, evaluable, cfg_cond):
+def veredicto(comp, alfa=0.05):
+    """
+    Regla de decisión completa, docs/ANALYSIS.md sección 2. Exige superar el
+    umbral, que el extremo inferior del intervalo bootstrap tampoco lo cruce y
+    que el valor p corregido por Holm quede por debajo de alfa. El valor p
+    corregido solo existe después de recorrer la familia de nueve celdas, de
+    modo que esta función se aplica al final. Antes del 2026-09-24 la etiqueta
+    omitía la condición de Holm, inconsistencia con el criterio declarado que
+    no cambió ningún veredicto de la campaña porque los nueve valores p
+    corregidos quedaron en 0.0176.
+    """
+    if comp.get("supera_umbral") is not True:
+        return False
+    p = comp.get("p_holm")
+    return p is not None and p < alfa
+
+
+def etiquetar(comp, razon, evaluable, cfg_cond, mejora=None):
     """
     Etiqueta de la celda. La mejora la decide solo el error lateral, y el
     esfuerzo de dirección califica esa mejora con las bandas declaradas.
+
+    mejora en None usa la condición de umbral e intervalo, que es lo único
+    disponible mientras la familia de nueve celdas no haya corrido. El valor
+    definitivo se pasa desde main con la condición de Holm ya aplicada.
     """
     if not evaluable:
         return "no evaluable"
-    if comp.get("supera_umbral") is not True:
+    if mejora is None:
+        mejora = comp.get("supera_umbral") is True
+    if not mejora:
         return "sin mejora practica"
     if razon <= cfg_cond["banda_bajo_costo"]:
         return "mejora practica de bajo costo"
@@ -191,7 +231,12 @@ def analizar_celda(filas, region, perfil, campo_rmse, umbral, cfg_cond):
         comp = {"reduccion_media_m": float(np.mean(dif)),
                 "ic95_bootstrap_m": [bajo, alto],
                 "umbral_m": umbral.get(g) if umbral else None,
-                "n_sesiones": len(dif)}
+                "n_sesiones": len(dif),
+                # Tamaños de efecto. El relativo dice cuánto del error del
+                # geométrico se elimina y el biserial de rangos mide la
+                # consistencia del signo entre sesiones.
+                "reduccion_relativa_pct": float(100.0 * np.mean(dif) / geo["rmse_medio_m"]),
+                "r_rangos_biserial": rango_biserial(dif)}
         if len(dif) >= 6:
             w = stats.wilcoxon([valor(d[MPC], region, campo_rmse) for d in completas.values()],
                                [valor(d[g], region, campo_rmse) for d in completas.values()])
@@ -210,6 +255,7 @@ def analizar_celda(filas, region, perfil, campo_rmse, umbral, cfg_cond):
         if comp["umbral_m"] is not None and bajo is not None:
             comp["supera_umbral"] = bool(comp["reduccion_media_m"] > comp["umbral_m"]
                                          and bajo > comp["umbral_m"])
+        # Etiqueta provisional. Se recalcula al final, cuando Holm ya corrió.
         comp["etiqueta"] = etiquetar(comp, razon, evaluable, cfg_cond)
         celda["comparaciones"][g] = comp
     return celda
@@ -227,6 +273,9 @@ def main():
                     help="ensayo, trata cada repetición del piloto como una sesión, para ejercitar "
                          "el contraste estadístico sin datos de campaña")
     ap.add_argument("--salida", default=str(SALIDA))
+    ap.add_argument("--sin-cache", action="store_true",
+                    help="recalcula sin sobrescribir el metricas.json de cada corrida. Úsalo "
+                         "siempre en los chequeos de robustez, que corren con otra configuración")
     args = ap.parse_args()
 
     cfg = json.load(open(args.config, encoding="utf-8"))
@@ -239,7 +288,8 @@ def main():
                 "banda_bajo_costo": crit["esfuerzo_reportado"]["banda_bajo_costo"],
                 "banda_actividad_superior": crit["esfuerzo_reportado"]["banda_actividad_superior"]}
 
-    filas = recolectar(cfg, args.fase, set(args.perfiles), args.recalcular)
+    filas = recolectar(cfg, args.fase, set(args.perfiles), args.recalcular or args.sin_cache,
+                       escribir_cache=not args.sin_cache)
     if args.repeticiones_como_sesiones:
         # Ensayo sobre datos del piloto. El sufijo del identificador de plan
         # hace de sesión, solo para comprobar que el contraste corre.
@@ -271,7 +321,12 @@ def main():
         for celda in resultado["celdas"]:
             clave = f"{celda['perfil']}|{celda['region']}"
             if g in celda["comparaciones"] and clave in ajustados:
-                celda["comparaciones"][g]["p_holm"] = ajustados[clave]
+                comp = celda["comparaciones"][g]
+                comp["p_holm"] = ajustados[clave]
+                comp["mejora"] = veredicto(comp)
+                comp["etiqueta"] = etiquetar(
+                    comp, comp["razon_esfuerzo_mpc_sobre_geometrico"], comp["evaluable"],
+                    cfg_cond, mejora=comp["mejora"])
 
     print(f"\n{'celda':22s} {'n':>3s} {'MPC':>8s} {'Stanley':>8s} {'PurePur':>8s}  "
           f"{'reduccion vs PP':>16s} {'reduccion vs St':>16s}")
@@ -286,11 +341,7 @@ def main():
             comp = celda["comparaciones"].get(g)
             if not comp:
                 return "       -        "
-            marca = ""
-            if comp.get("supera_umbral") is True:
-                marca = " *"
-            elif comp.get("supera_umbral") is False:
-                marca = " ."
+            marca = " *" if comp.get("mejora") else " ."
             return f"{comp['reduccion_media_m']:+.3f}{marca:>3s}"
         print(f"{celda['perfil']+' '+celda['region']:22s} {celda['sesiones_completas']:3d} "
               f"{r(MPC):>8s} {r('stanley'):>8s} {r('pure_pursuit'):>8s}  "

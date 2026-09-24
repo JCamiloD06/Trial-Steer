@@ -1,0 +1,176 @@
+{
+  "fecha": "2026-09-24 11:19",
+  "raiz": "C:\\Users\\Camilo\\Documents\\Volante TDG\\virtual_mpc_car\\P00_control_lateral\\empaquetado\\dist\\Trial_Steer\\P00_control_lateral",
+  "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+  "ejecutable": "C:\\Users\\Camilo\\Documents\\Volante TDG\\virtual_mpc_car\\P00_control_lateral\\empaquetado\\dist\\Trial_Steer\\Trial_Steer_consola.exe",
+  "resultados": [
+    {
+      "control": "armado del comando en fase prueba",
+      "resultado": "ok",
+      "detalle": "C:\\Users\\Camilo\\Documents\\Volante TDG\\virtual_mpc_car\\P00_control_lateral\\empaquetado\\dist\\Trial_Steer\\P00_control_lateral\\ejecutar_corrida.py --controlador stanley --perfil conservador --sesion 0 --fase prueba --config C:\\Users\\Camilo\\Documents\\Volante TDG\\virtual_mpc_car\\P00_control_lateral\\empaquetado\\dist\\Trial_Steer\\P00_control_lateral\\configs\\base.json --tiempo-max-s 30"
+    },
+    {
+      "control": "validación del Id del plan en fase campana",
+      "resultado": "ok, exige"
+    },
+    {
+      "control": "validación del Id del plan en fase sintonia",
+      "resultado": "ok, exige"
+    },
+    {
+      "control": "validación del Id del plan en fase piloto",
+      "resultado": "ok, exige"
+    },
+    {
+      "control": "Prueba de controladores / Corrida / Elegir",
+      "resultado": "ok",
+      "dialogos": [
+        "askopenfilename, None, "
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Corrida / Iniciar corrida",
+      "resultado": "no se pulsa aquí, se prueba con el simulador"
+    },
+    {
+      "control": "Prueba de controladores / Corrida / Detener y guardar",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "Prueba de controladores / Corrida / Restaurar configuración del juego",
+      "resultado": "ok",
+      "dialogos": [
+        "showinfo, Restaurar, No hay respaldos. La plantilla nunca cambió la configuración del juego."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Plan de campaña / Usar seleccionada",
+      "resultado": "ok",
+      "dialogos": [
+        "showinfo, Plan, Selecciona una corrida de la tabla."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Plan de campaña / Correr la sesión",
+      "resultado": "ok",
+      "dialogos": [
+        "showerror, Campaña, No hay plan de campaña."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Plan de campaña / Usar siguiente",
+      "resultado": "ok",
+      "dialogos": [
+        "showinfo, Plan, No hay corridas pendientes o no hay plan."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Plan de campaña / Actualizar",
+      "resultado": "ok",
+      "dialogos": []
+    },
+    {
+      "control": "Prueba de controladores / Plan de campaña / Generar plan",
+      "resultado": "ok",
+      "dialogos": [
+        "askinteger, Semilla del plan, Semilla para el orden aleatorio de las 10 sesiones"
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Tanda de sintonía / Iniciar tanda",
+      "resultado": "ok",
+      "dialogos": [
+        "showerror, Tanda, No hay plan de sintonía."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Tanda de sintonía / Detener tanda",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "Prueba de controladores / Tanda de sintonía / Usar seleccionada",
+      "resultado": "ok",
+      "dialogos": [
+        "showinfo, Tanda de sintonía, Elige primero una fila del plan."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Tanda de sintonía / Actualizar",
+      "resultado": "ok",
+      "dialogos": []
+    },
+    {
+      "control": "Prueba de controladores / Tanda de sintonía / Generar plan",
+      "resultado": "ok",
+      "dialogos": [
+        "askinteger, Generar plan de sintonía, Semilla, queda registrada en el plan"
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Piloto / Iniciar tanda",
+      "resultado": "ok",
+      "dialogos": [
+        "showerror, Piloto, No hay plan de piloto."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Piloto / Repetir seleccionada",
+      "resultado": "ok",
+      "dialogos": [
+        "showinfo, Piloto, Elige primero una fila del plan."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Piloto / Actualizar",
+      "resultado": "ok",
+      "dialogos": []
+    },
+    {
+      "control": "Prueba de controladores / Piloto / Añadir bloque tiempo límite",
+      "resultado": "ok",
+      "dialogos": [
+        "showerror, Piloto, No hay plan de piloto."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Piloto / Generar plan",
+      "resultado": "ok",
+      "dialogos": [
+        "askyesno, Generar plan de piloto, Ajuste del perfil, 6 niveles de grip_usage_factor desde 0.8 hasta 0.7, tres controladores cada uno.\nRepetibilidad, 10 vueltas por controlador en perfil nominal."
+      ]
+    },
+    {
+      "control": "Prueba de controladores / Verificación fase 3 / Evaluar",
+      "resultado": "ok",
+      "dialogos": []
+    },
+    {
+      "control": "Prueba de controladores / Verificación fase 3 / Actualizar lista",
+      "resultado": "ok",
+      "dialogos": []
+    },
+    {
+      "control": "MPC completo / Iniciar MPC completo",
+      "resultado": "no se pulsa aquí, se prueba con el simulador"
+    },
+    {
+      "control": "MPC completo / Activar MPC",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "MPC completo / Detener y guardar",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "MPC completo / Generar gráficas",
+      "resultado": "deshabilitado en reposo"
+    },
+    {
+      "control": "rótulos de campos",
+      "resultado": "ok",
+      "detalle": "Fase, Controlador, Perfil, Sesión, Etiqueta, Id del plan, Tiempo máximo s, Configuración, No verificar vehículo, solo pruebas"
+    }
+  ],
+  "errores": [],
+  "archivos_de_configuracion_cambiados": []
+}

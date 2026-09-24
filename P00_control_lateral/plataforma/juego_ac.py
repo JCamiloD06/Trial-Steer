@@ -95,11 +95,60 @@ class ErrorJuego(Exception):
 
 # ---------------------------------------------------------------- configuración y plantilla
 
+def carpeta_documentos():
+    """Carpeta Documentos del usuario según Windows, también cuando está en OneDrive o en otro disco."""
+    try:
+        import uuid
+        guid = (ctypes.c_byte * 16).from_buffer_copy(uuid.UUID("{FDD39AD0-238F-46AF-ADB4-6C85480369C7}").bytes_le)
+        ruta = ctypes.c_wchar_p()
+        if ctypes.windll.shell32.SHGetKnownFolderPath(ctypes.byref(guid), 0, None, ctypes.byref(ruta)) == 0:
+            valor = ruta.value
+            ctypes.windll.ole32.CoTaskMemFree(ruta)
+            return Path(valor)
+    except Exception:
+        pass
+    return Path.home() / "Documents"
+
+
+def resolver_rutas(cfg):
+    """
+    Ubica el juego y su carpeta de configuración, añadido el 2026-09-24 para
+    que otro equipo no tenga que editar juego_ac.json.
+
+    Si ruta_ac no contiene acs.exe y en las bibliotecas de Steam hay una sola
+    instalación, se usa esa. Con varias o ninguna se deja la configurada y
+    comprobar_instalacion avisa cuáles encontró. Si la carpeta cfg configurada
+    no existe, se busca en la carpeta Documentos que reporta Windows.
+    """
+    configurada = Path(cfg["ruta_ac"])
+    cfg["_ruta_ac_configurada"] = str(configurada)
+    cfg["_instalaciones"] = []
+    if (configurada / "acs.exe").exists():
+        cfg["_ruta_ac_origen"] = "configuración"
+    else:
+        encontradas = buscar_instalaciones()
+        cfg["_instalaciones"] = [str(c) for c in encontradas]
+        if len(encontradas) == 1:
+            cfg["ruta_ac"] = str(encontradas[0])
+            cfg["_ruta_ac_origen"] = "detectada en las bibliotecas de Steam"
+        else:
+            cfg["_ruta_ac_origen"] = "no encontrada"
+    dir_cfg = Path(os.path.expanduser(cfg["directorio_cfg_juego"]))
+    cfg["_dir_cfg_origen"] = "configuración"
+    if not dir_cfg.exists():
+        alterna = carpeta_documentos() / "Assetto Corsa" / "cfg"
+        if alterna.exists():
+            dir_cfg = alterna
+            cfg["_dir_cfg_origen"] = "detectada en Documentos"
+    cfg["_dir_cfg_juego"] = dir_cfg
+    return cfg
+
+
 def cargar_config(ruta=RUTA_CONFIG):
     with open(ruta, encoding="utf-8") as f:
         cfg = json.load(f)
     cfg["_ruta_config"] = str(ruta)
-    cfg["_dir_cfg_juego"] = Path(os.path.expanduser(cfg["directorio_cfg_juego"]))
+    resolver_rutas(cfg)
     cfg["_dir_plantilla"] = procedencia.RAIZ_P00 / cfg["plantilla"]
     cfg["_dir_respaldos"] = procedencia.RAIZ_REPO / cfg["directorio_respaldos"]
     return cfg
@@ -202,15 +251,28 @@ def juego_abierto():
 def comprobar_instalacion(cfg):
     ruta = Path(cfg["ruta_ac"])
     if not (ruta / "acs.exe").exists():
-        encontradas = buscar_instalaciones()
-        pista = (" Encontré el juego en " + ", ".join(str(c) for c in encontradas) + "."
-                 if encontradas else " No encontré ninguna instalación en las bibliotecas de Steam.")
+        encontradas = cfg.get("_instalaciones") or [str(c) for c in buscar_instalaciones()]
+        if len(encontradas) > 1:
+            pista = (" Hay varias instalaciones en las bibliotecas de Steam, " + ", ".join(encontradas)
+                     + ". Escribe en ruta_ac la que quieres usar.")
+        elif encontradas:
+            pista = " Encontré el juego en " + encontradas[0] + "."
+        else:
+            pista = " No encontré ninguna instalación en las bibliotecas de Steam."
         raise ErrorJuego(f"no se encuentra acs.exe en {ruta}. Corrige la clave ruta_ac en "
                          f"{cfg.get('_ruta_config', RUTA_CONFIG)} con la carpeta donde está instalado "
                          f"Assetto Corsa, la que contiene acs.exe.{pista}")
     appid = ruta / "steam_appid.txt"
     if not appid.exists() or appid.read_text(encoding="utf-8", errors="replace").strip() != cfg["steam_appid"]:
-        raise ErrorJuego(f"falta {appid} con el valor {cfg['steam_appid']}. Sin él Steam abre el lanzador oficial.")
+        # Sin este archivo Steam abre el lanzador oficial, que reescribe la carpeta cfg. Se crea
+        # automáticamente desde el 2026-09-24. Si Windows no da permiso de escritura, se avisa.
+        try:
+            appid.write_text(cfg["steam_appid"], encoding="utf-8")
+        except OSError as e:
+            raise ErrorJuego(f"falta {appid} con el valor {cfg['steam_appid']} y no se pudo crear, {e}. "
+                             "Créalo a mano o abre el programa como administrador una vez. "
+                             "Sin él Steam abre el lanzador oficial.")
+        cfg["_steam_appid_creado"] = True
 
 
 def lanzar(cfg):
@@ -375,6 +437,13 @@ def _preparar(cfg, reiniciar, log, info):
     info.update({"config": cfg["_ruta_config"], "inicio": time.strftime("%Y-%m-%dT%H:%M:%S"),
                  "reinicio_pedido": bool(reiniciar), "pasos": [],
                  "mods": estado_mods(cfg["ruta_ac"])})
+    info["rutas"] = {"ruta_ac": cfg["ruta_ac"], "origen": cfg.get("_ruta_ac_origen"),
+                     "ruta_ac_configurada": cfg.get("_ruta_ac_configurada"),
+                     "dir_cfg_juego": str(cfg["_dir_cfg_juego"]), "origen_cfg": cfg.get("_dir_cfg_origen")}
+    if cfg.get("_ruta_ac_origen", "").startswith("detectada"):
+        log(f"Assetto Corsa detectado en {cfg['ruta_ac']}, la ruta de juego_ac.json no existe en este equipo")
+    if cfg.get("_dir_cfg_origen", "").startswith("detectada"):
+        log(f"Carpeta de configuración del juego detectada en {cfg['_dir_cfg_juego']}")
     if info["mods"]["csp_activo"]:
         log("AVISO. Custom Shaders Patch está presente en la carpeta del juego y se carga con acs.exe. "
             "Puede sobrescribir el clima y la temperatura de pista de la plantilla, y con ellos el agarre.")
@@ -386,6 +455,9 @@ def _preparar(cfg, reiniciar, log, info):
     info["abierto_por_lanzador"] = not abierto
     if not abierto:
         comprobar_instalacion(cfg)
+        if cfg.get("_steam_appid_creado"):
+            info["steam_appid_creado"] = True
+            log(f"Creado steam_appid.txt en {cfg['ruta_ac']}")
         info["plantilla"] = aplicar_plantilla(cfg["_dir_plantilla"], cfg["_dir_cfg_juego"], cfg["_dir_respaldos"])
         if info["plantilla"]["reescritos"]:
             log(f"Plantilla escrita, archivos cambiados {info['plantilla']['reescritos']}, "

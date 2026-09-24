@@ -105,6 +105,14 @@ def cargar_datos():
 
 
 def resolver(texto, datos, avisos):
+    def incluir(m):
+        ruta = FUENTES / "fragmentos" / f"{m.group(1)}.md"
+        if ruta.exists():
+            return ruta.read_text(encoding="utf-8").strip()
+        avisos.append(f"resultado pendiente {m.group(1)}")
+        return "[RESULTADO PENDIENTE DE EJECUCIÓN]"
+
+    texto = re.sub(r"\[\[INCLUIR:(\w+)\]\]", incluir, texto)
     for k, v in datos.items():
         texto = texto.replace("{{" + k + "}}", v)
     for faltante in sorted(set(re.findall(r"\{\{(\w+)\}\}", texto))):
@@ -259,7 +267,130 @@ def sombrear(celda, color):
     tcpr.append(shd)
 
 
-def posproceso(ruta, nombre, titulo_doc):
+def _run(p, texto, tam=None, negrita=False, cursiva=False, color=None):
+    r = p.add_run(texto)
+    r.font.name = "Calibri"
+    if tam:
+        r.font.size = Pt(tam)
+    r.font.bold = negrita
+    r.font.italic = cursiva
+    if color:
+        r.font.color.rgb = RGBColor.from_string(color)
+    return r
+
+
+def _parrafo(doc, antes, texto="", jc=None, **fmt):
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(2)
+    p.paragraph_format.space_after = Pt(2)
+    if jc is not None:
+        p.alignment = jc
+    if texto:
+        _run(p, texto, **fmt)
+    antes.addprevious(p._p)
+    return p
+
+
+def _borde_inferior(p, color):
+    ppr = p._p.get_or_add_pPr()
+    bdr = OxmlElement("w:pBdr")
+    b = OxmlElement("w:bottom")
+    for k, v in (("w:val", "single"), ("w:sz", "4"), ("w:space", "0"), ("w:color", color)):
+        b.set(qn(k), v)
+    bdr.append(b)
+    ppr.append(bdr)
+
+
+def _celda(celda, lineas, fill, ancho_dxa, borde, negrita=False, tam=11, jc=WD_ALIGN_PARAGRAPH.LEFT):
+    tcpr = celda._tc.get_or_add_tcPr()
+    tcw = OxmlElement("w:tcW")
+    tcw.set(qn("w:w"), str(ancho_dxa))
+    tcw.set(qn("w:type"), "dxa")
+    tcpr.append(tcw)
+    bordes = OxmlElement("w:tcBorders")
+    for lado in ("top", "left", "bottom", "right"):
+        e = OxmlElement(f"w:{lado}")
+        for k, v in (("w:val", "single"), ("w:sz", "4"), ("w:space", "0"), ("w:color", borde)):
+            e.set(qn(k), v)
+        bordes.append(e)
+    tcpr.append(bordes)
+    if fill:
+        sombrear(celda, fill)
+    mar = OxmlElement("w:tcMar")
+    for lado, w in (("top", 80), ("left", 100), ("bottom", 80), ("right", 100)):
+        e = OxmlElement(f"w:{lado}")
+        e.set(qn("w:w"), str(w))
+        e.set(qn("w:type"), "dxa")
+        mar.append(e)
+    tcpr.append(mar)
+    va = OxmlElement("w:vAlign")
+    va.set(qn("w:val"), "center")
+    tcpr.append(va)
+    celda.paragraphs[0].text = ""
+    for i, linea in enumerate(lineas):
+        p = celda.paragraphs[0] if i == 0 else celda.add_paragraph()
+        p.alignment = jc
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.space_after = Pt(0)
+        _run(p, linea, tam=tam, negrita=negrita)
+
+
+def portada(doc, datos, clave_doc, titulo_doc):
+    """Portada con el diseño de los documentos de referencia del profesor."""
+    marca = next((p for p in doc.paragraphs if p.text.strip() == "[[PORTADA]]"), None)
+    if marca is None:
+        return
+    antes = marca._p
+    autores = [a.strip() for a in re.split(r",\s*|\s+y\s+", datos["AUTORES"]) if a.strip()]
+    correos = [c.strip() for c in datos["CONTACTO"].split(" y ")]
+    filas = [("Autores:", autores), ("Versión:", [datos["VERSION"]]), ("Fecha:", [datos["FECHA"]]),
+             ("Afiliación institucional:", [datos["AFILIACION"]]),
+             ("Contacto:", correos), ("Repositorio:", [datos["REPOSITORIO"]])]
+    J = WD_ALIGN_PARAGRAPH.JUSTIFY
+    if clave_doc == "descripcion":
+        _parrafo(doc, antes, datos["NOMBRE"], tam=28, negrita=True, color="1F3864")
+        _parrafo(doc, antes, "Descripción del Software", tam=17, negrita=True, color="0F6E6E")
+        _parrafo(doc, antes)
+        _parrafo(doc, antes, datos["SUBTITULO"], jc=J, tam=11, cursiva=True, color="444444")
+        _parrafo(doc, antes)
+        tabla = doc.add_table(rows=len(filas), cols=2)
+        anchos, fill_rot, fill_val, borde, tam = (2600, 6900), "EAF1F1", None, "D9D9D9", 9.5
+    else:
+        _parrafo(doc, antes, datos["NOMBRE"], tam=32, negrita=True)
+        _parrafo(doc, antes, titulo_doc + " del programa", tam=18)
+        _parrafo(doc, antes)
+        _borde_inferior(_parrafo(doc, antes), "003E7E")
+        _parrafo(doc, antes)
+        _parrafo(doc, antes, datos["SUBTITULO"], jc=J, cursiva=True)
+        _parrafo(doc, antes)
+        tabla = doc.add_table(rows=len(filas) + 1, cols=2)
+        anchos, fill_rot, fill_val, borde, tam = (1900, 4000), "BDD7EE", "FFFFFF", "BFBFBF", 11
+    bordes_tabla(tabla, visibles=True)
+    tabla.alignment = WD_TABLE_ALIGNMENT.LEFT
+    tblw = tabla._tbl.tblPr.find(qn("w:tblW"))
+    if tblw is None:
+        tblw = OxmlElement("w:tblW")
+        tabla._tbl.tblPr.append(tblw)
+    tblw.set(qn("w:w"), str(sum(anchos)))
+    tblw.set(qn("w:type"), "dxa")
+    for i, (rotulo, valor) in enumerate(filas):
+        c0, c1 = tabla.rows[i].cells
+        _celda(c0, [rotulo], fill_rot, anchos[0], borde, negrita=True, tam=tam)
+        fondo = "F2F2F2" if (fill_val and rotulo == "Versión:") else fill_val
+        _celda(c1, valor, fondo, anchos[1], borde, tam=tam,
+               jc=J if rotulo.startswith("Afiliación") else WD_ALIGN_PARAGRAPH.LEFT)
+    if clave_doc != "descripcion":
+        ultima = tabla.rows[len(filas)].cells
+        unida = ultima[0].merge(ultima[1])
+        _celda(unida, [datos["CONTEXTO"]], "BDD7EE", sum(anchos), borde, jc=J)
+    antes.addprevious(tabla._tbl)
+    if clave_doc == "descripcion":
+        _parrafo(doc, antes)
+        _parrafo(doc, antes, datos["CONTEXTO"], tam=9.5, cursiva=True, color="595959")
+    antes.getparent().remove(antes)
+
+
+def posproceso(ruta, nombre, titulo_doc, datos=None, clave_doc=""):
     doc = Document(ruta)
     sec = doc.sections[0]
     sec.different_first_page_header_footer = True
@@ -272,17 +403,49 @@ def posproceso(ruta, nombre, titulo_doc):
     pie = sec.footer.paragraphs[0]
     pie.alignment = WD_ALIGN_PARAGRAPH.CENTER
     campo_pagina(pie)
-    for i, tabla in enumerate(doc.tables):
-        portada = i == 0
-        bordes_tabla(tabla, visibles=not portada)
+    for tabla in doc.tables:
+        bordes_tabla(tabla, visibles=True)
         for fila_i, fila in enumerate(tabla.rows):
             for celda in fila.cells:
                 for p in celda.paragraphs:
                     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
                     for r in p.runs:
-                        r.font.size = Pt(9.5 if not portada else 11)
-                if fila_i == 0 and not portada:
+                        r.font.size = Pt(9.5)
+                if fila_i == 0:
                     sombrear(celda, "DCE8F5")
+    if datos is not None:
+        portada(doc, datos, clave_doc, titulo_doc)
+    # Todo el texto en negro, pedido del investigador el 2026-09-24. Solo cambia el color de la letra,
+    # no los bordes ni los sombreados de las tablas.
+    raices = [doc.element, doc.styles.element]
+    for s in doc.sections:
+        raices += [s.header._element, s.footer._element, s.first_page_header._element]
+    for raiz in raices:
+        for c in raiz.iter(qn("w:color")):
+            c.set(qn("w:val"), "000000")
+            for a in ("w:themeColor", "w:themeShade", "w:themeTint"):
+                if c.get(qn(a)) is not None:
+                    del c.attrib[qn(a)]
+    # Idioma español para la ortografía de Word y modo de compatibilidad actual.
+    rpr = doc.styles.element.find(qn("w:docDefaults")).find(qn("w:rPrDefault")).find(qn("w:rPr"))
+    lang = rpr.find(qn("w:lang"))
+    if lang is None:
+        lang = OxmlElement("w:lang")
+        rpr.append(lang)
+    for k in ("w:val", "w:eastAsia", "w:bidi"):
+        lang.set(qn(k), "es-CO")
+    ajustes = doc.settings.element
+    compat = ajustes.find(qn("w:compat"))
+    if compat is None:
+        compat = OxmlElement("w:compat")
+        ajustes.append(compat)
+    for e in compat.findall(qn("w:compatSetting")):
+        if e.get(qn("w:name")) == "compatibilityMode":
+            compat.remove(e)
+    cs = OxmlElement("w:compatSetting")
+    for k, v in (("w:name", "compatibilityMode"), ("w:uri", "http://schemas.microsoft.com/office/word"), ("w:val", "15")):
+        cs.set(qn(k), v)
+    compat.append(cs)
     # Word llena la tabla de contenido al abrir el documento, si no se corrió actualizar_con_word.ps1.
     act = OxmlElement("w:updateFields")
     act.set(qn("w:val"), "true")
@@ -345,7 +508,7 @@ def main():
             if r.returncode != 0:
                 print(r.stderr)
                 sys.exit(1)
-            posproceso(destino, datos["NOMBRE"], titulo)
+            posproceso(destino, datos["NOMBRE"], titulo, datos, Path(fuente).stem)
             # Copia de las figuras con el número que tienen en el documento, para entregarlas aparte.
             carpeta_fig = DIR / "figuras_numeradas" / Path(fuente).stem
             carpeta_fig.mkdir(parents=True, exist_ok=True)

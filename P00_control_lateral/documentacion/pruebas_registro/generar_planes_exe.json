@@ -1,0 +1,16 @@
+{
+  "planes": [
+    "plan_campana.json",
+    "plan_sintonia.json",
+    "plan_piloto.json"
+  ],
+  "errores": 0,
+  "dialogos": [
+    "askinteger 12345, Semilla del plan",
+    "askyesno Sí, Confirmar",
+    "askinteger 12345, Generar plan de sintonía",
+    "showinfo, Plan de sintonía, Plan guardado en C:\\Users\\Camilo\\AppData\\Local\\Temp\\ts_copia\\P00_control_lateral\\configs\\plan_sintonia.json\n60 configura",
+    "askyesno Sí, Generar plan de piloto",
+    "showinfo, Piloto, Plan guardado en C:\\Users\\Camilo\\AppData\\Local\\Temp\\ts_copia\\P00_control_lateral\\configs\\plan_piloto.json\n6 configuracio"
+  ]
+}

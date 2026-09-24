@@ -288,49 +288,117 @@ def figura_4():
 
 
 # ---------------------------------------------------------------- figura 5
+def veredicto_celda(celda):
+    """
+    Clasifica la celda en tres estados, no en dos. Mejora cuando el MPC supera
+    la regla de decisión. Peor en términos prácticos cuando la diferencia
+    adversa supera el mismo umbral, que no es lo mismo que no mejorar.
+    Equivalencia cuando la diferencia queda dentro del umbral en los dos
+    sentidos. Distinción adoptada el 2026-09-24.
+    """
+    if celda is None:
+        return None, "sin datos"
+    estados = {}
+    for ctrl in ("pure_pursuit", "stanley"):
+        comp = celda["comparaciones"].get(ctrl)
+        if comp is None or not comp.get("evaluable", False):
+            estados[ctrl] = None
+            continue
+        if comp.get("mejora"):
+            estados[ctrl] = "mejora"
+        elif -comp["reduccion_media_m"] > comp["umbral_m"]:
+            estados[ctrl] = "peor"
+        else:
+            estados[ctrl] = "equivalente"
+    vals = [v for v in estados.values() if v]
+    if not vals:
+        return estados, "sin datos"
+    mejoras = vals.count("mejora")
+    if mejoras == len(vals):
+        estado = "mejora frente a los dos"
+    elif mejoras:
+        estado = "mejora frente a uno"
+    elif "peor" in vals:
+        estado = "MPC con más error"
+    else:
+        estado = "equivalencia"
+    return estados, estado
+
+
 def figura_5():
-    """Mapa de operación, veredicto por perfil de velocidad y región."""
+    """
+    Mapa de operación. Matriz de perfil por región, y dentro de cada celda el
+    RMSE de los tres controladores en barras sobre una escala común, de modo
+    que se lea a la vez la magnitud del error, el veredicto y la inversión en
+    curvatura alta. Rehecha el 2026-09-24, la versión anterior era solo texto.
+    """
     datos = cargar_json(MAPA_CAMPANA)
     if datos is None:
         return saltar(5, f"no existe {relativa(MAPA_CAMPANA)}, la campaña no ha corrido")
 
     celdas = {(c["perfil"], c["region"]): c for c in datos["celdas"]}
-    fig, ax = plt.subplots(figsize=(7.2, 3.4))
-    for j, perfil in enumerate(ORDEN_PERFIL):
+    valores = [celdas[k]["por_controlador"][c]["rmse_medio_m"]
+               for k in celdas for c in ORDEN_CTRL if c in celdas[k]["por_controlador"]]
+    tope = max(valores) * 1.34
+
+    fondo = {"mejora frente a los dos": "#d7e6dc", "mejora frente a uno": "#dfe7ef",
+             "equivalencia": "#eef0f2", "MPC con más error": "#f4ece5", "sin datos": "#eeeeee"}
+    tinta = {"mejora frente a los dos": "#1d5c3a", "mejora frente a uno": "#1d5c3a",
+             "equivalencia": "#4a5a63", "MPC con más error": "#8a4a22", "sin datos": "#777777"}
+    # La celda de perfil rapido y curvatura alta es la única cuyo veredicto
+    # cambia al mover la frontera de región a 120 m. Se marca en la figura.
+    sensibles = {("rapido", "alta")}
+    filas = list(reversed(ORDEN_PERFIL))  # velocidad creciente hacia arriba
+    fig, axs = plt.subplots(3, 3, figsize=(7.2, 5.0), sharex=True,
+                            gridspec_kw={"hspace": .22, "wspace": .1})
+    for j, perfil in enumerate(filas):
         for i, region in enumerate(ORDEN_REGION):
+            ax = axs[j][i]
             celda = celdas.get((perfil, region))
-            texto, color = texto_celda(celda)
-            ax.add_patch(plt.Rectangle((i, j), 1, 1, facecolor=color, edgecolor="white", linewidth=2))
-            ax.text(i + .5, j + .5, texto, ha="center", va="center", fontsize=7.4, linespacing=1.35)
-    ax.set_xlim(0, 3)
-    ax.set_ylim(0, 3)
-    ax.set_xticks([.5, 1.5, 2.5], [f"curvatura {r}" for r in ORDEN_REGION])
-    ax.set_yticks([.5, 1.5, 2.5], [f"perfil {p}" for p in ORDEN_PERFIL])
-    ax.grid(False)
-    for lado in ("left", "bottom"):
-        ax.spines[lado].set_visible(False)
-    ax.tick_params(length=0)
-    ax.set_title("Mapa de operación, veredicto del MPC frente a cada controlador geométrico")
+            estados, estado = veredicto_celda(celda)
+            ax.set_facecolor(fondo[estado])
+            ax.grid(False)
+            for lado in ("top", "right", "left", "bottom"):
+                ax.spines[lado].set_visible(False)
+            ax.set_xlim(0, tope)
+            ax.set_ylim(-.65, 2.65)
+            ax.set_yticks([])
+            if celda is None:
+                ax.text(.5, .5, "sin datos", transform=ax.transAxes, ha="center", va="center")
+                continue
+            for k, ctrl in enumerate(ORDEN_CTRL):
+                v = celda["por_controlador"][ctrl]["rmse_medio_m"]
+                y = 2 - k
+                ax.barh(y, v, height=.62, color=COLOR_CTRL[ctrl],
+                        edgecolor="#111111" if ctrl == "mpc_cinematico" else "none",
+                        linewidth=.7 if ctrl == "mpc_cinematico" else 0)
+                ax.text(v + tope * .025, y, f"{v * 1000:.0f}", va="center", fontsize=6.8,
+                        color="#333333")
+            marca = " (a)" if (perfil, region) in sensibles else ""
+            ax.text(.5, -.6, estado + marca, ha="center", va="bottom", fontsize=7,
+                    fontweight="bold" if estado.startswith("mejora") else "normal",
+                    color=tinta[estado])
+            if j == 0:
+                ax.set_title(f"curvatura {region}", fontsize=8.5, pad=6)
+            if i == 0:
+                ax.set_ylabel("perfil\n" + perfil, rotation=0, ha="right", va="center",
+                              fontsize=8.5, labelpad=10)
+    for ax in axs[2]:
+        ax.set_xlabel("RMSE de e_y en mm", fontsize=7.5)
+        ax.set_xticks([0, .2, .4], ["0", "200", "400"])
+        ax.tick_params(labelbottom=True)
+
+    manijas = [Patch(facecolor=COLOR_CTRL[c], label=NOMBRE_CTRL[c]) for c in ORDEN_CTRL]
+    fig.legend(handles=manijas, loc="lower center", ncols=3, bbox_to_anchor=(.5, -.05))
+    fig.suptitle("Mapa de operación. Error lateral de los tres controladores por región y perfil",
+                 fontsize=9.5, y=.975)
+    fig.text(.5, -.155, "La velocidad crece hacia arriba y la exigencia geométrica hacia la derecha. "
+                        "El veredicto exige superar el umbral medido en el piloto, intervalo bootstrap "
+                        "por encima y valor p corregido por Holm menor que 0.05. Equivalencia significa "
+                        "diferencia dentro del umbral en los dos sentidos. (a) Único veredicto sensible "
+                        "a la frontera de región, pasa a mejora con 120 m en lugar de 100 m.",
+             ha="center", fontsize=7, color="#555555", wrap=True)
     return guardar(fig, 5, "mapa_operacion")
-
-
-def texto_celda(celda):
-    if celda is None:
-        return "sin datos", "#eeeeee"
-    lineas, mejoras = [], 0
-    for ctrl in ("pure_pursuit", "stanley"):
-        comp = celda["comparaciones"].get(ctrl)
-        if comp is None:
-            continue
-        if not comp.get("evaluable", False):
-            lineas.append(f"{NOMBRE_CTRL[ctrl]}, no evaluable")
-            continue
-        mejora = comp.get("supera_umbral") and comp.get("p_holm", 1.0) < .05
-        mejoras += 1 if mejora else 0
-        lineas.append(f"{NOMBRE_CTRL[ctrl]}, {'mejora' if mejora else 'sin mejora'}\n"
-                      f"{comp['reduccion_media_m'] * 1000:+.0f} mm, p {comp.get('p_holm', float('nan')):.3f}")
-    color = {0: "#f0eee9", 1: "#dfe7ef", 2: "#cfe0d6"}[mejoras]
-    return "\n\n".join(lineas) if lineas else "sin datos", color
 
 
 # ---------------------------------------------------------------- figura 6
@@ -372,6 +440,13 @@ def figura_6():
                       label="umbral de mejora práctica")]
     ax.legend(handles=manijas, loc="lower right")
     ax.grid(axis="y", visible=False)
+    # El intervalo suele ser más angosto que el propio marcador. Se dice en la
+    # nota al pie para que no parezca que falta dibujarlo.
+    semi = max((c["ic95_bootstrap_m"][1] - c["ic95_bootstrap_m"][0]) / 2 for _, _, c in filas) * 1000
+    fig.text(.01, -.02 - .01 * (len(filas) > 12),
+             f"El intervalo es más angosto que el marcador en casi todas las comparaciones. "
+             f"La semiamplitud mayor de las {len(filas)} es de {semi:.1f} mm.",
+             fontsize=7, color="#555555")
     return guardar(fig, 6, "reduccion_intervalos")
 
 

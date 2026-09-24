@@ -1,23 +1,4 @@
-::: {custom-style="Title"}
-{{NOMBRE}}
-:::
-
-::: {custom-style="Subtitle"}
-Manual técnico del programa
-:::
-
-::: {custom-style="Cubierta"}
-{{SUBTITULO}}
-:::
-
-| | |
-|---|---|
-| Autores | {{AUTORES}} |
-| Versión | {{VERSION}} |
-| Fecha | {{FECHA}} |
-| Afiliación institucional | {{AFILIACION}} |
-| Contacto | {{CONTACTO}} |
-| Repositorio | {{REPOSITORIO}} |
+[[PORTADA]]
 
 [[SALTO]]
 
@@ -94,6 +75,7 @@ La Tabla [[tab:estructura]] lista los directorios y archivos del software con su
 | `configs/` | Configuración base, del simulador, planes y plantilla de sesión |
 | `pruebas/` | Siete archivos de pruebas automáticas |
 | `requirements.txt` | Versiones de las librerías |
+| `empaquetado/` | Punto de entrada, especificación y guion de construcción del ejecutable |
 
 ## 2.4. Flujo general de ejecución
 
@@ -157,7 +139,7 @@ La clase `Trazada` carga el archivo CSV con las columnas x, z y longitud acumula
 
 ### 3.2.9. juego_ac.py
 
-Abre y prepara el simulador. `aplicar_plantilla` compara la plantilla de `configs/sesion_ac` con la carpeta de configuración del juego y, si algún archivo difiere, respalda la carpeta completa antes de escribir. `lanzar` abre `acs.exe`, `esperar_en_vivo` espera la sesión en vivo, `VentanaAC.clic` pulsa el botón del volante del menú con coordenadas escaladas al tamaño de la ventana, `probar_control` envía un freno de prueba por vJoy y lo lee en la memoria compartida, y `restaurar_respaldo` copia de vuelta el último respaldo. `preparar` ejecuta la secuencia de la Figura [[fig:preparacion]] y devuelve la información que se copia al manifiesto. El módulo registra también si Custom Shaders Patch está presente en la carpeta del juego, porque puede cambiar el clima y la temperatura de pista.
+Abre y prepara el simulador. `resolver_rutas` ubica el juego al cargar la configuración. Si `ruta_ac` no contiene acs.exe y `buscar_instalaciones` encuentra una sola instalación en las bibliotecas de Steam, leídas del registro de Windows y de libraryfolders.vdf, usa esa. Con varias o ninguna deja la configurada y `comprobar_instalacion` detiene la preparación con un mensaje que las lista. Si la carpeta cfg configurada no existe, la busca en la carpeta Documentos que reporta Windows con SHGetKnownFolderPath, lo que cubre Documentos en OneDrive. `comprobar_instalacion` crea `steam_appid.txt` si falta y avisa si Windows no da permiso. La ruta usada y su origen quedan en el registro de cada preparación. `aplicar_plantilla` compara la plantilla de `configs/sesion_ac` con la carpeta de configuración del juego y, si algún archivo difiere, respalda la carpeta completa antes de escribir. `lanzar` abre `acs.exe`, `esperar_en_vivo` espera la sesión en vivo, `VentanaAC.clic` pulsa el botón del volante del menú con coordenadas escaladas al tamaño de la ventana, `probar_control` envía un freno de prueba por vJoy y lo lee en la memoria compartida, y `restaurar_respaldo` copia de vuelta el último respaldo. `preparar` ejecuta la secuencia de la Figura [[fig:preparacion]] y devuelve la información que se copia al manifiesto. El módulo registra también si Custom Shaders Patch está presente en la carpeta del juego, porque puede cambiar el clima y la temperatura de pista.
 
 ## 3.3. Módulo controladores
 
@@ -379,7 +361,7 @@ y la tasa de dirección se calcula como la diferencia de ángulos aplicados entr
 
 ## 8.2. Mapa de campaña y pruebas estadísticas
 
-`mapa_campana.py` agrupa las vueltas de una fase por perfil y región, tres por tres, con la vuelta como unidad de análisis. Implementa la prueba de Friedman sobre los tres controladores con la sesión como bloque, la prueba de Wilcoxon pareada del MPC contra cada geométrico, la corrección de Holm en dos familias de nueve celdas y un intervalo bootstrap del 95 por ciento de la diferencia que remuestrea sesiones completas. El criterio del mapa tiene tres capas, factibilidad, decisión de mejora con el umbral leído del piloto y esfuerzo reportado con bandas de 1.5 y 3 para la razón de tasas de dirección. Ningún umbral se decide en el código, todos se leen de la configuración y de la salida del piloto.
+`mapa_campana.py` agrupa las vueltas de una fase por perfil y región, tres por tres, con la vuelta como unidad de análisis. Implementa la prueba de Friedman sobre los tres controladores con la sesión como bloque, la prueba de Wilcoxon pareada del MPC contra cada geométrico, la corrección de Holm en dos familias de nueve celdas y un intervalo bootstrap del 95 por ciento de la diferencia que remuestrea sesiones completas. Como tamaño del efecto de cada contraste de Wilcoxon calcula la correlación biserial de rangos para pares emparejados. El criterio del mapa tiene tres capas, factibilidad, decisión de mejora con el umbral leído del piloto y esfuerzo reportado con bandas de 1.5 y 3 para la razón de tasas de dirección. Ningún umbral se decide en el código, todos se leen de la configuración y de la salida del piloto.
 
 ## 8.3. Gráficas
 
@@ -405,7 +387,13 @@ Cada corrida produce una carpeta en `data/raw/p00/corridas` con tres archivos. `
 
 Los planes se guardan en `configs/plan_campana.json`, `configs/plan_sintonia.json` y `configs/plan_piloto.json`. Los de campaña y sintonía guardan la semilla, la fecha de generación, el método y la versión de numpy, y el del piloto guarda la fecha de generación, los parámetros y el agarre fijado. Los respaldos de la configuración del simulador se guardan en `data/raw/p00/respaldos_cfg_ac` y la información de cada preparación en `data/raw/p00/preparaciones_ac`.
 
-# 10. Restricciones y limitaciones
+# 10. Parámetros de configuración
+
+Todos los parámetros que gobiernan una corrida están en dos archivos JSON y ninguno está fijado dentro del código. La Tabla [[tab:parametros_base]] reúne los de `configs/base.json` y la Tabla [[tab:parametros_juego]] los de `configs/juego_ac.json`, con el valor vigente en la versión {{VERSION}}. Los valores se leen de los archivos al generar este documento con `documentacion/tabla_parametros.py`, que falla si algún parámetro no tiene nombre y descripción. Los campos de la interfaz que cambian una corrida sin editar estos archivos se describen en el Manual de usuario.
+
+[[INCLUIR:parametros]]
+
+# 11. Restricciones y limitaciones
 
 * El software depende de Assetto Corsa, de Steam y de vJoy en Windows, programas que no son de los autores.
 * La configuración incluida cubre una pista, Monza, y un vehículo, el Alfa Romeo Giulietta QV. La constante de dirección y los parámetros de los controladores se midieron y sintonizaron para esa combinación.
@@ -416,19 +404,29 @@ Los planes se guardan en `configs/plan_campana.json`, `configs/plan_sintonia.jso
 * El clic sobre el menú del simulador usa coordenadas de la ventana y puede fallar al reabrir el juego. En ese caso el lanzador espera hasta 120 s a que el usuario pulse el volante del menú.
 * La presencia de Custom Shaders Patch puede cambiar el clima y la temperatura de pista fijados por la plantilla. El software lo registra pero no lo impide.
 
-# 11. Despliegue
+# 12. Despliegue
+
+La instalación desde el código fuente sigue estos pasos. Para usar el ejecutable basta con los pasos 1, 3, 4 y 5, aplicados a la carpeta del ejecutable, y abrir `Trial_Steer.exe`.
 
 1. Instalar Steam, Assetto Corsa y vJoy, y configurar vJoy como dispositivo 1.
 2. Instalar Python 3.14 y, desde la raíz del repositorio, las librerías con `python -m pip install -r P00_control_lateral/requirements.txt`.
-3. Revisar en `configs/juego_ac.json` la ruta de instalación del simulador y la carpeta de configuración del juego.
-4. Crear en la carpeta del juego el archivo `steam_appid.txt` con el número 244210. Sin ese archivo `acs.exe` no abre directo y Steam abre el lanzador oficial, que reescribe la carpeta de configuración.
+3. Revisar `configs/juego_ac.json` solo si hay varias instalaciones del simulador. Con una sola, el programa la encuentra y usa sin editar el archivo.
+4. Comprobar que el programa pudo crear `steam_appid.txt` con el número 244210 en la carpeta del juego. Lo crea solo, y si Windows no da permiso hay que crearlo a mano. Sin ese archivo `acs.exe` no abre directo y Steam abre el lanzador oficial, que reescribe la carpeta de configuración.
 5. Verificar que la plantilla de `configs/sesion_ac` asigna vJoy como control, con Monza, el Giulietta QV y sesión de vuelta rápida.
 6. Ejecutar las pruebas automáticas, por ejemplo `python P00_control_lateral/pruebas/prueba_humo.py`.
 7. Abrir el lanzador con `python P00_control_lateral/abrir_lanzador.py` desde la raíz del repositorio.
 
+## 12.1. Ejecutable para Windows
+
+El ejecutable se construye con PyInstaller mediante `python P00_control_lateral/empaquetado/construir_exe.py`, que usa la especificación `empaquetado/trial_steer.spec`. El resultado es una carpeta `Trial_Steer` con dos ejecutables que comparten las librerías de `_internal`. `Trial_Steer.exe` abre la ventana sin consola. `Trial_Steer_consola.exe` ejecuta los procesos hijos, las corridas, el script del MPC completo y el guion de gráficas, porque esos procesos escriben en consola y el MPC completo solo guarda al recibir Ctrl+C de consola. Junto a los ejecutables se copian los archivos .py y las configuraciones con la estructura del repositorio, porque el código calcula sus rutas a partir de su ubicación y así las corridas quedan guardadas en `data/raw/p00/corridas` dentro de la misma carpeta.
+
+El punto de entrada, `empaquetado/trial_steer.py`, hace que el ejecutable cumpla el papel del intérprete de Python. Sin argumentos abre el lanzador, con un archivo .py lo ejecuta y con la opción -c ejecuta el código indicado. También fija la salida en UTF-8, porque el ejecutable ignora la variable PYTHONIOENCODING y sin ese ajuste la corrida se detenía al escribir la letra δ en consola, falla que se encontró al probar el ejecutable el 24 de septiembre de 2026.
+
+## 12.2. Ejecución desde el código fuente
+
 Una corrida también puede ejecutarse sin la ventana, con el simulador abierto y el vehículo en pista, con `python P00_control_lateral/ejecutar_corrida.py --controlador stanley --perfil conservador --sesion 0 --fase prueba`.
 
-# 12. Tecnologías utilizadas
+# 13. Tecnologías utilizadas
 
 : Tabla [[tab:tec]]. Tecnologías utilizadas.
 
@@ -440,11 +438,12 @@ Una corrida también puede ejecutarse sin la ventana, con el simulador abierto y
 | scipy | 1.18.1 | Matrices dispersas y pruebas estadísticas |
 | osqp | 1.1.3 | Solución del problema cuadrático del MPC |
 | pyvjoy | 1.0.1 | Acceso al dispositivo vJoy |
+| PyInstaller | 6.22.3 | Construcción del ejecutable, solo para quien lo construye |
 | ctypes y mmap | incluidas en Python | Lectura de memoria compartida |
 | Assetto Corsa | leída del simulador en cada corrida | Planta vehicular |
 | vJoy | instalada en el equipo de referencia | Dispositivo de juego virtual |
 
-# 13. Glosario
+# 14. Glosario
 
 Batalla. Distancia entre el eje delantero y el eje trasero del vehículo.
 

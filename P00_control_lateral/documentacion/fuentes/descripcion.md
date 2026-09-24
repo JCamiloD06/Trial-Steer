@@ -1,28 +1,4 @@
-::: {custom-style="Title"}
-{{NOMBRE}}
-:::
-
-::: {custom-style="Subtitle"}
-Descripción del software
-:::
-
-::: {custom-style="Cubierta"}
-{{SUBTITULO}}
-:::
-
-| | |
-|---|---|
-| Autores | {{AUTORES}} |
-| Versión | {{VERSION}} |
-| Fecha | {{FECHA}} |
-| Afiliación institucional | {{AFILIACION}} |
-| Director | {{DIRECTOR}} |
-| Contacto | {{CONTACTO}} |
-| Repositorio | {{REPOSITORIO}} |
-
-::: {custom-style="Cubierta"}
-{{CONTEXTO}}
-:::
+[[PORTADA]]
 
 [[SALTO]]
 
@@ -45,10 +21,11 @@ La Tabla [[tab:info]] resume los datos de identificación del software. Los valo
 | Autores | {{AUTORES}} |
 | Afiliación | {{AFILIACION}} |
 | Año | 2026 |
-| Estado | Funcional, en uso para una campaña experimental en curso |
+| Estado | Funcional, usado en una campaña experimental de 90 vueltas terminada el 24 de septiembre de 2026 |
 | Lenguaje | Python 3.14 |
 | Plataforma | Windows 11 de 64 bits |
 | Programas externos | Assetto Corsa con Steam y el controlador de dispositivo virtual vJoy |
+| Distribución | Ejecutable para Windows con todas las librerías incluidas, y código fuente |
 | Hardware de verificación | Procesador AMD Ryzen 5 5600H, 7.3 GB de memoria, tarjeta NVIDIA GeForce GTX 1650 |
 | Repositorio | {{REPOSITORIO}} |
 
@@ -58,7 +35,7 @@ La Tabla [[tab:info]] resume los datos de identificación del software. Los valo
 
 {{PROYECTO}}
 
-El problema que aborda es la comparación de controladores de seguimiento de trayectoria bajo las mismas condiciones. Cuando dos controladores se prueban con plantas, perfiles de velocidad, lazos longitudinales o registros distintos, las diferencias observadas pueden deberse a esas piezas y no a la ley de control. El software fija esas piezas comunes y deja como única diferencia entre corridas el controlador lateral y sus parámetros. Incluye tres controladores, Pure Pursuit, Stanley y un control predictivo basado en modelo (MPC) con modelo bicicleta cinemático, que comparten una interfaz de programación única.
+El problema que atiende es la comparación de controladores de seguimiento de trayectoria bajo las mismas condiciones. Cuando dos controladores se prueban con plantas, perfiles de velocidad, lazos longitudinales o registros distintos, las diferencias observadas pueden deberse a esas piezas y no a la ley de control. El software fija esas piezas comunes y deja como única diferencia entre corridas el controlador lateral y sus parámetros. Incluye tres controladores, Pure Pursuit, Stanley y un control predictivo basado en modelo (MPC) con modelo bicicleta cinemático, que comparten una interfaz de programación única.
 
 El software se desarrolló como herramienta de ejecución para un estudio sobre el desempeño de esos tres controladores en función de la velocidad y de la curvatura del trazado. La herramienta no es el resultado de ese estudio. Permite correr vueltas individuales con cualquier controlador y perfil de velocidad, generar y ejecutar planes aleatorizados con semilla para la sintonía y la campaña y un plan por bloques para el piloto, verificar la plataforma con una lista de puntos de control, y calcular métricas por vuelta y por región de curvatura. Está pensado para investigadores y estudiantes de control automático que necesitan una planta vehicular externa, con dinámica que no programaron ellos mismos, para probar leyes de control en tiempo real.
 
@@ -70,7 +47,7 @@ La Figura [[fig:arquitectura]] muestra los componentes principales y el flujo de
 
 ### Requisitos para el usuario final
 
-El software se ejecutó y verificó en un computador portátil con Windows 11 Home de 64 bits, procesador AMD Ryzen 5 5600H de 6 núcleos y 12 hilos, 7.3 GB de memoria y tarjeta gráfica NVIDIA GeForce GTX 1650. Esa es la única configuración verificada y se toma como referencia. El usuario necesita además los programas de la Tabla [[tab:req]].
+El software se entrega como ejecutable para Windows, `Trial_Steer.exe`, que incluye el intérprete de Python y todas las librerías, de modo que el usuario final no necesita instalar Python. El software se ejecutó y verificó en un computador portátil con Windows 11 Home de 64 bits, procesador AMD Ryzen 5 5600H de 6 núcleos y 12 hilos, 7.3 GB de memoria y tarjeta gráfica NVIDIA GeForce GTX 1650. Esa es la única configuración verificada y se toma como referencia. El usuario necesita además los programas de la Tabla [[tab:req]].
 
 : Tabla [[tab:req]]. Programas necesarios para la operación con el simulador.
 
@@ -155,7 +132,7 @@ Cada módulo empieza con una descripción de su propósito y de las decisiones q
 
 ### Extensiones ya realizadas
 
-Durante el desarrollo se añadieron, sobre la versión inicial, la entrada progresiva de la dirección, la detección del cruce por posición normalizada, el abandono automático, la apertura del simulador desde el lanzador, las tandas encadenadas de sintonía, piloto y campaña, y el campo *Sesiones seguidas*. Cada cambio quedó registrado con su motivo en `docs/DECISIONS.md` y en `docs/P00_PLAN_CONTROLADORES.md`.
+Durante el desarrollo se añadieron, sobre la versión inicial, la entrada progresiva de la dirección, la detección del cruce por posición normalizada, el abandono automático, la apertura del simulador desde el lanzador, las tandas encadenadas de sintonía, piloto y campaña, y el campo *Sesiones seguidas*. Cada cambio quedó registrado con su motivo en `docs/DECISIONS.md` y en `docs/P00_PLAN_CONTROLADORES.md`. La versión 1.0.1 añade el ejecutable para Windows, la detección automática de la instalación del juego en otro equipo, y corrige el nombre del archivo de configuración de los niveles de agarre 0.70 y 0.80 del plan del piloto, que perdía el punto de la extensión. La corrección conserva los archivos con el nombre anterior, de modo que el piloto ya corrido sigue encontrando su configuración.
 
 # 6. Robustez, desempeño y consistencia
 
@@ -229,7 +206,7 @@ La Tabla [[tab:dep]] separa la autoría de cada componente. Las librerías de Py
 
 ## 9.3. Portabilidad
 
-El código no fija rutas absolutas del repositorio, que se calculan a partir de la ubicación de cada archivo. La ruta de instalación del simulador y la carpeta de configuración del juego están en `configs/juego_ac.json`, y el módulo de apertura busca otras instalaciones de Assetto Corsa en las bibliotecas de Steam cuando la ruta configurada no existe.
+El código no fija rutas absolutas del repositorio, que se calculan a partir de la ubicación de cada archivo. La ruta de instalación del simulador y la carpeta de configuración del juego están en `configs/juego_ac.json`, pero no hace falta editarlas en otro equipo. Cuando la ruta configurada no existe y en las bibliotecas de Steam hay una sola instalación de Assetto Corsa, el programa la usa, crea el archivo `steam_appid.txt` si falta y busca la carpeta de configuración del juego en Documentos, también cuando está en OneDrive. Solo con varias instalaciones hay que indicar cuál usar.
 
 # 10. Documentación y soporte técnico
 
@@ -241,7 +218,7 @@ El contacto para soporte es {{CONTACTO}}.
 
 # 11. Pruebas, validación y desempeño
 
-Las pruebas automáticas se ejecutaron el 23 de septiembre de 2026 en el equipo de referencia con Python 3.14.7. La Tabla [[tab:pruebas]] muestra el resultado de cada archivo. Ninguna prueba requiere el simulador ni vJoy.
+Las pruebas automáticas se ejecutaron el 24 de septiembre de 2026 en el equipo de referencia con Python 3.14.7. La Tabla [[tab:pruebas]] muestra el resultado de cada archivo. Ninguna prueba requiere el simulador ni vJoy.
 
 : Tabla [[tab:pruebas]]. Resultado de las pruebas automáticas.
 
@@ -249,20 +226,22 @@ Las pruebas automáticas se ejecutaron el 23 de septiembre de 2026 en el equipo 
 |---|---|---|
 | `prueba_abandono.py` | Criterios de abandono automático, esperas, exclusión de pits y lectura de sus valores | 12 de 12 |
 | `prueba_humo.py` | Proyección, perfil escalado, respuesta de los tres controladores en recta y en círculo, entrada progresiva, límites, signo de vJoy, ejes por contactos, cruce de meta y registro | 21 de 21 |
-| `prueba_juego_ac.py` | Plantilla de sesión, escalado del botón, respaldo, restauración, posición de salida y huellas | 20 de 20 |
+| `prueba_juego_ac.py` | Plantilla de sesión, escalado del botón, respaldo, restauración, posición de salida, huellas y detección de la instalación del juego | 25 de 25 |
 | `prueba_lanzador.py` | Plan de campaña con semilla, estado del plan, resumen, verificación, construcción de la ventana y sus pestañas, tandas e identificador de plan | 17 de 17 |
 | `prueba_mapa_campana.py` | Corrección de Holm, intervalo bootstrap, Friedman, Wilcoxon, umbral de mejora, esfuerzo y factibilidad | 26 de 26 |
-| `prueba_plan_piloto.py` | Plan del piloto por bloques y escalera de agarre | 26 de 26 |
+| `prueba_plan_piloto.py` | Plan del piloto por bloques, escalera de agarre y nombre de los archivos por nivel | 28 de 28 |
 | `prueba_plan_sintonia.py` | Plan de sintonía con semilla y rangos | 14 de 14 |
-| Total | | 136 de 136 |
+| Total | | 143 de 143 |
 
-Además de las pruebas automáticas, la plataforma se validó en el simulador con corridas de verificación, cuyos puntos de control están implementados en la pestaña *Verificación fase 3*. Entre ellos están el modelo de vehículo leído, la disponibilidad de la física ampliada, la batalla medida, la desalineación entre ejes y orientación, la velocidad al primer cruce de meta, el porcentaje de ciclos con tiempo de cómputo bajo 50 ms, el periodo medio, las saturaciones, el signo entre el comando de vJoy y el ángulo de dirección del simulador, y la reidentificación de la constante de la cadena de dirección. Al 23 de septiembre de 2026 la carpeta `data/raw/p00/corridas` contiene 9 corridas de verificación, 61 de sintonía, 37 de piloto, 2 de prueba y 36 de campaña, estas últimas del primer bloque de la campaña.
+[[INCLUIR:pruebas_interfaz]]
+
+La plataforma también se validó en el simulador con corridas de verificación, cuyos puntos de control están implementados en la pestaña *Verificación fase 3*. Entre ellos están el modelo de vehículo leído, la disponibilidad de la física ampliada, la batalla medida, la desalineación entre ejes y orientación, la velocidad al primer cruce de meta, el porcentaje de ciclos con tiempo de cómputo bajo 50 ms, el periodo medio, las saturaciones, el signo entre el comando de vJoy y el ángulo de dirección del simulador, y la reidentificación de la constante de la cadena de dirección. Al 24 de septiembre de 2026 la carpeta `data/raw/p00/corridas` contiene 9 corridas de verificación, 61 de sintonía, 37 de piloto, 90 de campaña y 6 de prueba, cuatro de ellas hechas para el Manual de usuario.
 
 # 12. Impacto y utilización
 
 ## 12.1. Impacto en investigación
 
-El software es la herramienta de ejecución de un estudio en curso que compara Pure Pursuit, Stanley y un MPC cinemático en función de la velocidad y de la curvatura sobre Assetto Corsa. A la fecha de este documento la campaña de ese estudio no ha terminado y sus resultados no se reportan aquí.
+El software es la herramienta de ejecución de un estudio en curso que compara Pure Pursuit, Stanley y un MPC cinemático en función de la velocidad y de la curvatura sobre Assetto Corsa. La campaña de ese estudio, de 90 vueltas en 10 sesiones, terminó el 24 de septiembre de 2026. Sus resultados pertenecen a ese estudio y no se reportan aquí.
 
 ## 12.2. Impacto en docencia
 
