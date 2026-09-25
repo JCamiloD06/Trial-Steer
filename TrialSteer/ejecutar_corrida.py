@@ -10,7 +10,7 @@ con Ctrl+C, al aparecer el archivo de detención que crea el lanzador o al
 superar un tiempo máximo opcional. El registro se escribe siempre al salir.
 
 Uso desde la raíz del repositorio, con Assetto Corsa abierto y el vehículo en pista.
-    python trial_steer/ejecutar_corrida.py --controlador stanley --perfil conservador --sesion 0 --fase verificacion
+    python TrialSteer/ejecutar_corrida.py --controlador stanley --perfil conservador --sesion 0 --fase verificacion
 """
 import argparse
 import json
@@ -72,7 +72,7 @@ def _resumen_ciclos(filas):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Corrida de Trial Steer en Assetto Corsa")
+    ap = argparse.ArgumentParser(description="Corrida de TrialSteer en Assetto Corsa")
     ap.add_argument("--controlador", required=True, choices=NOMBRES)
     ap.add_argument("--perfil", required=True, choices=PERFILES)
     ap.add_argument("--sesion", required=True, type=int)

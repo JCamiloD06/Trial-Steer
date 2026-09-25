@@ -1,5 +1,5 @@
 """
-Ventana principal de Trial Steer.
+Ventana principal de TrialSteer.
 
 Dos pestañas principales. Prueba de controladores, con las corridas, el plan
 de campaña y la verificación de la plataforma. MPC completo, que ejecuta sin modificarlo
@@ -280,7 +280,7 @@ class Lanzador(tk.Tk):
     def _lanzar_corrida(self, archivo_sesion_ac):
         fase = self.var_fase.get()
         self.archivo_sesion_ac = archivo_sesion_ac
-        self.archivo_detener = os.path.join(tempfile.gettempdir(), f"trial_steer_detener_{os.getpid()}_{int(time.time())}.flag")
+        self.archivo_detener = os.path.join(tempfile.gettempdir(), f"TrialSteer_detener_{os.getpid()}_{int(time.time())}.flag")
         args = self._argumentos(validar=True, archivo_detener=self.archivo_detener,
                                 archivo_sesion_ac=archivo_sesion_ac)
         entorno = dict(os.environ, PYTHONIOENCODING="utf-8")

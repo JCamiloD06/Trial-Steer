@@ -1,8 +1,8 @@
-# Trial Steer v1.0.1
+# TrialSteer v1.0.1
 
 Software de escritorio para ejecutar, registrar y evaluar corridas de controladores laterales y longitudinales de vehículos sobre el simulador Assetto Corsa.
 
-Trial Steer ejecuta tres controladores laterales, Pure Pursuit, Stanley y un control predictivo basado en modelo (MPC) con modelo bicicleta cinemático, bajo las mismas condiciones. Los tres comparten la lectura del estado del vehículo desde la memoria compartida del simulador, la trazada de referencia, el perfil de velocidad, el lazo longitudinal PID, la actuación por el dispositivo virtual vJoy y el registro de cada corrida. Incluye además la ejecución del MPC completo de dirección y velocidad con sus gráficas.
+TrialSteer ejecuta tres controladores laterales, Pure Pursuit, Stanley y un control predictivo basado en modelo (MPC) con modelo bicicleta cinemático, bajo las mismas condiciones. Los tres comparten la lectura del estado del vehículo desde la memoria compartida del simulador, la trazada de referencia, el perfil de velocidad, el lazo longitudinal PID, la actuación por el dispositivo virtual vJoy y el registro de cada corrida. Incluye además la ejecución del MPC completo de dirección y velocidad con sus gráficas.
 
 ## Autores
 
@@ -19,22 +19,22 @@ Contacto, jdiazlop@unal.edu.co y jlastrar@unal.edu.co.
 
 ## Instalación
 
-Con el ejecutable, se descarga `Trial_Steer_v1.0.1_windows.zip` de la sección Releases del repositorio, se descomprime en una carpeta con permiso de escritura y se abre `Trial_Steer.exe`. `Trial_Steer_consola.exe` lo usa el programa para las corridas y no se abre a mano.
+Con el ejecutable, se descarga `TrialSteer_v1.0.1_windows.zip` de la sección Releases del repositorio, se descomprime en una carpeta con permiso de escritura y se abre `TrialSteer.exe`. `TrialSteer_consola.exe` lo usa el programa para las corridas y no se abre a mano.
 
 Desde el código fuente, en la raíz del repositorio.
 
 ```
 python -m pip install -r requirements.txt
-python trial_steer/abrir_lanzador.py
+python TrialSteer/abrir_lanzador.py
 ```
 
 Para construir el ejecutable, con PyInstaller instalado.
 
 ```
-python trial_steer/empaquetado/construir_exe.py
+python TrialSteer/empaquetado/construir_exe.py
 ```
 
-El programa encuentra solo la instalación de Assetto Corsa cuando hay una sola en las bibliotecas de Steam, y crea `steam_appid.txt` en la carpeta del juego si falta. Con varias instalaciones se escribe la elegida en `ruta_ac` de `trial_steer/configs/juego_ac.json`.
+El programa encuentra solo la instalación de Assetto Corsa cuando hay una sola en las bibliotecas de Steam, y crea `steam_appid.txt` en la carpeta del juego si falta. Con varias instalaciones se escribe la elegida en `ruta_ac` de `TrialSteer/configs/juego_ac.json`.
 
 ## Uso
 
@@ -43,7 +43,7 @@ La ventana tiene dos pestañas principales, Prueba de controladores y MPC comple
 ### Una corrida
 
 1. En la pestaña Corrida se eligen la fase, el controlador, el perfil de velocidad, la sesión y una etiqueta. La fase prueba sirve para corridas sueltas.
-2. Se pulsa Iniciar corrida. El programa abre Assetto Corsa con la plantilla de sesión de `trial_steer/configs/sesion_ac`, respalda antes la configuración del juego, pulsa el volante del menú y arranca la vuelta.
+2. Se pulsa Iniciar corrida. El programa abre Assetto Corsa con la plantilla de sesión de `TrialSteer/configs/sesion_ac`, respalda antes la configuración del juego, pulsa el volante del menú y arranca la vuelta.
 3. La salida del proceso aparece en Salida en vivo. La corrida termina sola al completar la vuelta medida, por abandono automático o al pulsar Detener y guardar, y en todos los casos guarda el registro.
 4. Al terminar, el resumen aparece en Resumen de la última corrida.
 
@@ -51,8 +51,8 @@ Restaurar configuración del juego devuelve la carpeta de configuración de Asse
 
 ### Planes de corridas
 
-* Tanda de sintonía genera con semilla un plan de búsqueda aleatoria dentro de los rangos de `trial_steer/configs/rangos_sintonia.json` y corre sus vueltas en tanda.
-* Piloto genera un plan por bloques con los parámetros de `trial_steer/configs/parametros_piloto.json`, primero el ajuste del perfil base, luego la repetibilidad y al final el bloque del tiempo límite.
+* Tanda de sintonía genera con semilla un plan de búsqueda aleatoria dentro de los rangos de `TrialSteer/configs/rangos_sintonia.json` y corre sus vueltas en tanda.
+* Piloto genera un plan por bloques con los parámetros de `TrialSteer/configs/parametros_piloto.json`, primero el ajuste del perfil base, luego la repetibilidad y al final el bloque del tiempo límite.
 * Plan de campaña genera una sola vez con semilla el orden aleatorio de controladores y perfiles por sesión. Usar siguiente carga la siguiente corrida pendiente y Correr la sesión corre en tanda las pendientes.
 
 Los planes no se sobrescriben. Cada corrida del plan queda marcada como hecha o pendiente según las carpetas de corridas guardadas.
@@ -77,14 +77,14 @@ Marco de la trazada, con ángulos medidos con atan2 de z sobre x. ψ es la orien
 
 | Ruta | Contenido |
 |---|---|
-| `trial_steer/abrir_lanzador.py` | Punto de entrada de la interfaz gráfica |
-| `trial_steer/ejecutar_corrida.py` | Una corrida con un controlador y un perfil, como proceso aparte |
-| `trial_steer/version.py` | Nombre, versión y fecha de congelamiento |
-| `trial_steer/lanzador/` | Interfaz gráfica, planes y lectura de corridas guardadas |
-| `trial_steer/plataforma/` | Lectura del simulador, trazada, perfil, lazo longitudinal, vJoy, vuelta, abandono, registro, procedencia y apertura del juego |
-| `trial_steer/controladores/` | Pure Pursuit, Stanley y MPC cinemático con interfaz común |
-| `trial_steer/configs/` | Parámetros, rangos de sintonía, parámetros del piloto y plantilla de sesión de Assetto Corsa |
-| `trial_steer/empaquetado/` | Punto de entrada y construcción del ejecutable |
+| `TrialSteer/abrir_lanzador.py` | Punto de entrada de la interfaz gráfica |
+| `TrialSteer/ejecutar_corrida.py` | Una corrida con un controlador y un perfil, como proceso aparte |
+| `TrialSteer/version.py` | Nombre, versión y fecha de congelamiento |
+| `TrialSteer/lanzador/` | Interfaz gráfica, planes y lectura de corridas guardadas |
+| `TrialSteer/plataforma/` | Lectura del simulador, trazada, perfil, lazo longitudinal, vJoy, vuelta, abandono, registro, procedencia y apertura del juego |
+| `TrialSteer/controladores/` | Pure Pursuit, Stanley y MPC cinemático con interfaz común |
+| `TrialSteer/configs/` | Parámetros, rangos de sintonía, parámetros del piloto y plantilla de sesión de Assetto Corsa |
+| `TrialSteer/empaquetado/` | Punto de entrada y construcción del ejecutable |
 | `Model Predictive Control/Python/` | Trazada de Monza y script del MPC completo |
 | `scripts/graficas_corrida.py` | Gráficas de una corrida del MPC completo |
 

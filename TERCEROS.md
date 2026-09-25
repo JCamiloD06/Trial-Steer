@@ -1,16 +1,16 @@
-# Componentes de terceros usados por Trial Steer v1.0.1
+# Componentes de terceros usados por TrialSteer v1.0.1
 
-Trial Steer no incluye ni reivindica la autoría de los componentes de esta lista. Cada uno conserva su licencia y sus derechos.
+TrialSteer no incluye ni reivindica la autoría de los componentes de esta lista. Cada uno conserva su licencia y sus derechos.
 
 ## Programas externos, no incluidos
 
-* Assetto Corsa, de Kunos Simulazioni. Es el entorno de simulación externo. Trial Steer no incluye ni reivindica propiedad sobre Assetto Corsa, sus vehículos, circuitos, recursos gráficos ni contenidos asociados. Solo lee la memoria compartida que el juego publica y le envía mandos a través de vJoy.
+* Assetto Corsa, de Kunos Simulazioni. Es el entorno de simulación externo. TrialSteer no incluye ni reivindica propiedad sobre Assetto Corsa, sus vehículos, circuitos, recursos gráficos ni contenidos asociados. Solo lee la memoria compartida que el juego publica y le envía mandos a través de vJoy.
 * Steam, de Valve. Plataforma de distribución del juego.
 * vJoy. Controlador de Windows que crea el dispositivo de juego virtual.
 
 ## Datos derivados de Assetto Corsa
 
-* `Model Predictive Control/Python/monza_fast_lane.csv`. Trazada de referencia de Monza. Se obtuvo del archivo `fast_lane.ai` de la pista Monza incluido en Assetto Corsa, convertido a CSV con una herramienta propia de los autores. La geometría de la pista proviene del juego y Trial Steer no reivindica su autoría. Solo se usa como referencia de trayectoria.
+* `Model Predictive Control/Python/monza_fast_lane.csv`. Trazada de referencia de Monza. Se obtuvo del archivo `fast_lane.ai` de la pista Monza incluido en Assetto Corsa, convertido a CSV con una herramienta propia de los autores. La geometría de la pista proviene del juego y TrialSteer no reivindica su autoría. Solo se usa como referencia de trayectoria.
 
 ## Librerías de Python
 
@@ -26,7 +26,7 @@ Se instalan desde `requirements.txt`, y en el ejecutable van dentro de la carpet
 
 ## Estructura de la memoria compartida de Assetto Corsa
 
-`trial_steer/plataforma/memoria_ac.py` declara con ctypes los campos de la memoria compartida que publica Assetto Corsa. Los campos posteriores a `abs` de la página de física se declararon siguiendo el archivo `Physics.cs` de la librería mdjarv/assettocorsasharedmemory, https://github.com/mdjarv/assettocorsasharedmemory. No se copió código de esa librería, que está escrita en C#. Se tomaron el orden, los nombres y los tipos de los campos, que describen el formato de datos del juego. Esa librería se distribuye con la licencia MIT, cuyo aviso se reproduce a continuación como atribución.
+`TrialSteer/plataforma/memoria_ac.py` declara con ctypes los campos de la memoria compartida que publica Assetto Corsa. Los campos posteriores a `abs` de la página de física se declararon siguiendo el archivo `Physics.cs` de la librería mdjarv/assettocorsasharedmemory, https://github.com/mdjarv/assettocorsasharedmemory. No se copió código de esa librería, que está escrita en C#. Se tomaron el orden, los nombres y los tipos de los campos, que describen el formato de datos del juego. Esa librería se distribuye con la licencia MIT, cuyo aviso se reproduce a continuación como atribución.
 
 ```
 MIT License

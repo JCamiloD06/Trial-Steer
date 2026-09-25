@@ -1,11 +1,11 @@
 """
-Qué archivos forman la distribución de Trial Steer.
+Qué archivos forman la distribución de TrialSteer.
 
 La usa el constructor del ejecutable, empaquetado/construir_exe.py, para
 copiar junto al ejecutable el mismo código fuente del repositorio.
 
 Entran el README, la licencia, la lista de componentes de terceros, las
-dependencias, la carpeta trial_steer y los tres archivos externos que el
+dependencias, la carpeta TrialSteer y los tres archivos externos que el
 programa usa. Quedan fuera los datos que el programa escribe al usarse, los
 planes que genera, los cachés de Python y las salidas de construcción.
 """

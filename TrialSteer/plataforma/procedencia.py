@@ -58,7 +58,7 @@ def estado_origen():
 
 
 def huellas_codigo():
-    """Huella de cada archivo de código de Trial Steer, para el manifiesto."""
+    """Huella de cada archivo de código de TrialSteer, para el manifiesto."""
     huellas = {}
     for ruta in sorted(RAIZ_APP.rglob("*.py")):
         if "__pycache__" in ruta.parts:

@@ -1,5 +1,5 @@
 {
-  "_descripcion": "Apertura y preparación de Assetto Corsa desde la ventana de Trial Steer.",
+  "_descripcion": "Apertura y preparación de Assetto Corsa desde la ventana de TrialSteer.",
   "ruta_ac": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\assettocorsa",
   "_nota_ruta_ac": "Si hay una sola instalación de Assetto Corsa en las bibliotecas de Steam el programa la encuentra solo. Con varias, se escribe aquí la elegida.",
   "steam_appid": "244210",

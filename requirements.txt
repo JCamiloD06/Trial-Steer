@@ -1,4 +1,4 @@
-# Dependencias de Trial Steer v1.0.1.
+# Dependencias de TrialSteer v1.0.1.
 # Versiones verificadas en el equipo de desarrollo.
 numpy==2.5.3
 scipy==1.18.1

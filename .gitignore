@@ -16,12 +16,12 @@ datos/
 Model Predictive Control/Python/runs/
 
 # Planes generados por el programa con semilla
-trial_steer/configs/plan_campana.json
-trial_steer/configs/plan_piloto.json
-trial_steer/configs/plan_sintonia.json
-trial_steer/configs/sintonia/
-trial_steer/configs/piloto/
+TrialSteer/configs/plan_campana.json
+TrialSteer/configs/plan_piloto.json
+TrialSteer/configs/plan_sintonia.json
+TrialSteer/configs/sintonia/
+TrialSteer/configs/piloto/
 
 # Construcción del ejecutable. El zip se publica en Releases, no en el repositorio.
-trial_steer/empaquetado/dist/
-trial_steer/empaquetado/build/
+TrialSteer/empaquetado/dist/
+TrialSteer/empaquetado/build/

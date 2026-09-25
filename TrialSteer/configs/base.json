@@ -1,5 +1,5 @@
 {
-  "_descripcion": "Configuracion comun de Trial Steer. Trazada, vehiculo, direccion, perfil de velocidad, lazo longitudinal, controladores, abandono automatico, deteccion de vuelta y salida.",
+  "_descripcion": "Configuracion comun de TrialSteer. Trazada, vehiculo, direccion, perfil de velocidad, lazo longitudinal, controladores, abandono automatico, deteccion de vuelta y salida.",
   "ts_s": 0.05,
   "trazada": {
     "csv": "Model Predictive Control/Python/monza_fast_lane.csv",

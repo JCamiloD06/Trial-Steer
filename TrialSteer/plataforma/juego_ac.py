@@ -1,5 +1,5 @@
 """
-Apertura y preparación de Assetto Corsa para una corrida de Trial Steer.
+Apertura y preparación de Assetto Corsa para una corrida de TrialSteer.
 
 Herramienta del lanzador. Resuelve tres cosas
 verificadas en la prueba del 2026-09-16.

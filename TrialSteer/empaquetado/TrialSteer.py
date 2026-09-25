@@ -1,5 +1,5 @@
 """
-Punto de entrada del ejecutable de Trial Steer.
+Punto de entrada del ejecutable de TrialSteer.
 
 El lanzador abre cada corrida como un proceso aparte con el intérprete de
 Python, sys.executable, y le pasa un script. Dentro del ejecutable no hay un
@@ -15,8 +15,8 @@ copias congeladas, para que las rutas que el código calcula a partir de su
 propia ubicación apunten a la carpeta de la distribución, donde se guardan
 las corridas, los respaldos y las preparaciones.
 
-La ventana se abre con Trial_Steer.exe, sin consola. Los procesos hijos usan
-Trial_Steer_consola.exe, con consola, porque la corrida escribe su salida en
+La ventana se abre con TrialSteer.exe, sin consola. Los procesos hijos usan
+TrialSteer_consola.exe, con consola, porque la corrida escribe su salida en
 la consola y el MPC completo solo guarda al recibir Ctrl+C de consola.
 """
 import os
@@ -64,7 +64,7 @@ def main():
     utf8()
     args = sys.argv[1:]
     if CONGELADO:
-        consola = BASE / "Trial_Steer_consola.exe"
+        consola = BASE / "TrialSteer_consola.exe"
         if consola.exists():
             sys.executable = str(consola)
     while args and args[0] in ("-u", "-B", "-E"):
@@ -79,7 +79,7 @@ def main():
         ejecutar_script(args[0], args[1:])
         return
     os.chdir(BASE)
-    ejecutar_script(BASE / "trial_steer" / "abrir_lanzador.py", [])
+    ejecutar_script(BASE / "TrialSteer" / "abrir_lanzador.py", [])
 
 
 if __name__ == "__main__":

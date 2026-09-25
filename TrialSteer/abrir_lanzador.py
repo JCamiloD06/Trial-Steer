@@ -1,8 +1,8 @@
 """
-Abre la ventana de Trial Steer.
+Abre la ventana de TrialSteer.
 
 Uso desde la raíz del repositorio.
-    python trial_steer/abrir_lanzador.py
+    python TrialSteer/abrir_lanzador.py
 """
 import sys
 from pathlib import Path
