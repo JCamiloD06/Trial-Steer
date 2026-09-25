@@ -1,0 +1,49 @@
+{
+  "_descripcion": "Parametros del plan de piloto. Se escriben antes de generar el plan. Los usa lanzador/plan_piloto.py.",
+  "_orden": "Primero el ajuste del perfil base y despues la repetibilidad. Cambiar grip_usage_factor cambia los tres perfiles, incluido el nominal, asi que la repetibilidad solo tiene sentido con el valor ya fijado.",
+  "sesion": 0,
+  "ajuste_perfil": {
+    "_objetivo": "Bajar el agarre planificado hasta que los tres controladores completen la vuelta del perfil rapido sin ningun ciclo con ruedas fuera. El nivel se acepta solo si los tres pasan, para que el perfil no quede ajustado a favor de un controlador.",
+    "perfil": "rapido",
+    "parametro": "grip_usage_factor",
+    "_nota_parametro": "Fraccion del agarre lateral que el planificador usa al construir el perfil. En base.json vale 0.8 y multiplica ay_max_ms2 de 6.5, es decir 5.2 m/s2 de aceleracion lateral planificada.",
+    "niveles": [
+      0.8,
+      0.78,
+      0.76,
+      0.74,
+      0.72,
+      0.7
+    ],
+    "_nota_niveles": "Escalera descendente desde el valor actual. Paso de 0.02, que cambia la velocidad en curva cerca de 1.3 por ciento por escalon. Si ninguno de los seis niveles pasa, el piloto se detiene y la escalera se revisa, no se amplia en caliente.",
+    "criterio_aceptacion": {
+      "vuelta_completada": true,
+      "ciclos_ruedas_fuera_max": 0,
+      "controladores_que_deben_pasar": "todos"
+    }
+  },
+  "repetibilidad": {
+    "_objetivo": "Estimar la desviacion estandar del RMSE de e_y entre vueltas identicas con el agarre ya fijado.",
+    "perfil": "nominal",
+    "repeticiones": 10,
+    "_nota_repeticiones": "Diez vueltas por controlador, 30 en total. Con diez vueltas el intervalo de confianza del 95 por ciento de sigma va de 0.69 a 1.83 veces el valor estimado, frente a 0.60 a 2.87 con cinco.",
+    "controladores": [
+      "pure_pursuit",
+      "stanley",
+      "mpc_cinematico"
+    ],
+    "_nota_controladores": "Los tres, porque la variabilidad puede depender del controlador."
+  },
+  "tiempo_limite": {
+    "_objetivo": "Fijar el tiempo limite de vuelta a partir de la duracion medida en el piloto.",
+    "_regla": "Se calcula al cerrar el piloto como el doble de la mediana del tiempo de vuelta del perfil mas lento, redondeado hacia arriba a multiplo de 10 s. No se decide en caliente.",
+    "_bloque_anadido": "Bloque de tres vueltas, una por controlador, en perfil conservador, que es el mas lento, con el agarre ya fijado. Se anade desde la pestana Piloto.",
+    "perfil": "conservador",
+    "repeticiones": 1,
+    "controladores": [
+      "pure_pursuit",
+      "stanley",
+      "mpc_cinematico"
+    ]
+  }
+}

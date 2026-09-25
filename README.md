@@ -1,12 +1,8 @@
-# Trial Steer
+# Trial Steer v1.0.1
 
-Plataforma de escritorio para la experimentación con controladores laterales y longitudinales de vehículos sobre el simulador Assetto Corsa.
+Software de escritorio para ejecutar, registrar y evaluar corridas de controladores laterales y longitudinales de vehículos sobre el simulador Assetto Corsa.
 
-Versión 1.0.1, septiembre de 2026.
-
-Trial Steer ejecuta Pure Pursuit, Stanley y un MPC con modelo bicicleta cinemático bajo las mismas condiciones. Los tres comparten la lectura del simulador, la trazada, el perfil de velocidad, el lazo longitudinal PID, la actuación por vJoy y el registro de corridas. Un lanzador gráfico arma y ejecuta las corridas, gestiona planes aleatorizados con semilla para sintonía, piloto y campaña, y evalúa las corridas guardadas. El paquete incluye además análisis por vuelta y por región de curvatura, y pruebas automáticas que no requieren el simulador.
-
-Es el programa encargado de la ejecución de pruebas del proyecto integral Volante direct drive con Force Feedback, https://github.com/JCamiloD06/Volante-direct-drive-con-Force-Feedback.
+Trial Steer ejecuta tres controladores laterales, Pure Pursuit, Stanley y un control predictivo basado en modelo (MPC) con modelo bicicleta cinemático, bajo las mismas condiciones. Los tres comparten la lectura del estado del vehículo desde la memoria compartida del simulador, la trazada de referencia, el perfil de velocidad, el lazo longitudinal PID, la actuación por el dispositivo virtual vJoy y el registro de cada corrida. Incluye además la ejecución del MPC completo de dirección y velocidad con sus gráficas.
 
 ## Autores
 
@@ -14,62 +10,91 @@ Francisco Javier Burgos Flórez, Juan Camilo Díaz López y Jesús Alberto Lastr
 Programa de Ingeniería Mecatrónica, Universidad Nacional de Colombia, Sede La Paz.
 Contacto, jdiazlop@unal.edu.co y jlastrar@unal.edu.co.
 
-## Estructura
+## Requisitos
+
+* Windows 10 u 11 de 64 bits.
+* Assetto Corsa instalado con Steam, con la pista Monza y el vehículo Alfa Romeo Giulietta QV.
+* El controlador vJoy instalado, con el dispositivo 1 activo.
+* Para ejecutar desde el código fuente, Python 3.14 con las dependencias de `requirements.txt`. El ejecutable ya las incluye.
+
+## Instalación
+
+Con el ejecutable, se descarga `Trial_Steer_v1.0.1_windows.zip` de la sección Releases del repositorio, se descomprime en una carpeta con permiso de escritura y se abre `Trial_Steer.exe`. `Trial_Steer_consola.exe` lo usa el programa para las corridas y no se abre a mano.
+
+Desde el código fuente, en la raíz del repositorio.
+
+```
+python -m pip install -r requirements.txt
+python trial_steer/abrir_lanzador.py
+```
+
+Para construir el ejecutable, con PyInstaller instalado.
+
+```
+python trial_steer/empaquetado/construir_exe.py
+```
+
+El programa encuentra solo la instalación de Assetto Corsa cuando hay una sola en las bibliotecas de Steam, y crea `steam_appid.txt` en la carpeta del juego si falta. Con varias instalaciones se escribe la elegida en `ruta_ac` de `trial_steer/configs/juego_ac.json`.
+
+## Uso
+
+La ventana tiene dos pestañas principales, Prueba de controladores y MPC completo.
+
+### Una corrida
+
+1. En la pestaña Corrida se eligen la fase, el controlador, el perfil de velocidad, la sesión y una etiqueta. La fase prueba sirve para corridas sueltas.
+2. Se pulsa Iniciar corrida. El programa abre Assetto Corsa con la plantilla de sesión de `trial_steer/configs/sesion_ac`, respalda antes la configuración del juego, pulsa el volante del menú y arranca la vuelta.
+3. La salida del proceso aparece en Salida en vivo. La corrida termina sola al completar la vuelta medida, por abandono automático o al pulsar Detener y guardar, y en todos los casos guarda el registro.
+4. Al terminar, el resumen aparece en Resumen de la última corrida.
+
+Restaurar configuración del juego devuelve la carpeta de configuración de Assetto Corsa al estado previo a la plantilla.
+
+### Planes de corridas
+
+* Tanda de sintonía genera con semilla un plan de búsqueda aleatoria dentro de los rangos de `trial_steer/configs/rangos_sintonia.json` y corre sus vueltas en tanda.
+* Piloto genera un plan por bloques con los parámetros de `trial_steer/configs/parametros_piloto.json`, primero el ajuste del perfil base, luego la repetibilidad y al final el bloque del tiempo límite.
+* Plan de campaña genera una sola vez con semilla el orden aleatorio de controladores y perfiles por sesión. Usar siguiente carga la siguiente corrida pendiente y Correr la sesión corre en tanda las pendientes.
+
+Los planes no se sobrescriben. Cada corrida del plan queda marcada como hecha o pendiente según las carpetas de corridas guardadas.
+
+### Verificación de la plataforma
+
+Se elige una corrida guardada, se pulsa Evaluar y la pestaña muestra los puntos de verificación de la plataforma, entre ellos el vehículo leído, la física ampliada, la batalla medida, el periodo de control, las saturaciones y la constante de la cadena de dirección.
+
+### MPC completo
+
+Iniciar MPC completo ejecuta `Model Predictive Control/Python/mpc_monza_Completo_barrido.py`. Activar MPC equivale a pulsar Enter cuando el vehículo está listo. Al terminar, Generar gráficas crea las cinco figuras de la corrida con `scripts/graficas_corrida.py`.
+
+## Datos que genera
+
+Cada corrida se guarda en `datos/corridas/<id>` con `telemetria.csv`, `perfil.csv` y `manifiesto.json`. El manifiesto registra la configuración usada, las versiones de las librerías y las huellas SHA256 del código. Los respaldos de la configuración del juego quedan en `datos/respaldos_cfg_ac`, el registro de cada preparación en `datos/preparaciones_ac` y el avance de las tandas en `datos/tandas`. Las corridas del MPC completo se guardan en `Model Predictive Control/Python/runs`.
+
+## Convención de signos
+
+Marco de la trazada, con ángulos medidos con atan2 de z sobre x. ψ es la orientación de la carrocería, heading de Assetto Corsa más un desfase de 90 grados medido. δ positivo hace crecer ψ y corresponde a comando positivo de vJoy. e_y positivo significa vehículo a la izquierda de la trazada y eψ es ψ menos la orientación de la trazada.
+
+## Estructura del código
 
 | Ruta | Contenido |
 |---|---|
-| `P00_control_lateral/abrir_lanzador.py` | Punto de entrada de la interfaz gráfica |
-| `P00_control_lateral/ejecutar_corrida.py` | Una corrida con un controlador y un perfil, como proceso aparte |
-| `P00_control_lateral/lanzador/` | Interfaz gráfica y gestión de planes |
-| `P00_control_lateral/plataforma/` | Lectura de Assetto Corsa, trazada, perfil, lazo longitudinal, vJoy, vuelta, registro, procedencia y apertura del juego |
-| `P00_control_lateral/controladores/` | Pure Pursuit, Stanley y MPC cinemático con interfaz común |
-| `P00_control_lateral/analisis/` | Métricas por vuelta y región, mapa por velocidad y curvatura, repetibilidad y selección de sintonía |
-| `P00_control_lateral/configs/` | Parámetros, rangos de sintonía y plantilla de sesión de Assetto Corsa |
-| `P00_control_lateral/pruebas/` | Pruebas automáticas |
-| `P00_control_lateral/documentacion/` | Descripción del software, manual técnico, manual de usuario y pruebas de la interfaz |
-| `P00_control_lateral/empaquetado/` | Construcción del ejecutable para Windows |
-| `Model Predictive Control/Python/monza_fast_lane.csv` | Trazada de referencia de Monza |
-| `Model Predictive Control/Python/mpc_monza_Completo_barrido.py` | Script del proyecto del volante que la pestaña MPC completo ejecuta sin modificar |
-| `scripts/` | Gráficas de una corrida, figuras y tablas |
+| `trial_steer/abrir_lanzador.py` | Punto de entrada de la interfaz gráfica |
+| `trial_steer/ejecutar_corrida.py` | Una corrida con un controlador y un perfil, como proceso aparte |
+| `trial_steer/version.py` | Nombre, versión y fecha de congelamiento |
+| `trial_steer/lanzador/` | Interfaz gráfica, planes y lectura de corridas guardadas |
+| `trial_steer/plataforma/` | Lectura del simulador, trazada, perfil, lazo longitudinal, vJoy, vuelta, abandono, registro, procedencia y apertura del juego |
+| `trial_steer/controladores/` | Pure Pursuit, Stanley y MPC cinemático con interfaz común |
+| `trial_steer/configs/` | Parámetros, rangos de sintonía, parámetros del piloto y plantilla de sesión de Assetto Corsa |
+| `trial_steer/empaquetado/` | Punto de entrada y construcción del ejecutable |
+| `Model Predictive Control/Python/` | Trazada de Monza y script del MPC completo |
+| `scripts/graficas_corrida.py` | Gráficas de una corrida del MPC completo |
 
-La carpeta `Model Predictive Control/Python/` conserva el nombre y la ubicación del proyecto del volante porque el código ubica la trazada y el script del MPC completo por rutas relativas a la raíz. Cambiarla exige cambiar el código.
+## Limitaciones
 
-## Requisitos
-
-Windows, Python 3, las dependencias de `P00_control_lateral/requirements.txt` y matplotlib para las gráficas. Assetto Corsa con la pista Monza y el Alfa Romeo Giulietta QV, y vJoy. Assetto Corsa, vJoy, Steam y las librerías de Python son de terceros y no forman parte de Trial Steer.
-
-## Ejecutable para Windows
-
-El ejecutable se publica en la sección Releases del repositorio como `Trial_Steer_v1.0.1_windows.zip`. Incluye Python y todas las librerías. Se descomprime en una carpeta con permiso de escritura y se abre `Trial_Steer.exe`. Requiere Assetto Corsa y vJoy instalados. El programa encuentra solo la instalación del juego en las bibliotecas de Steam y crea `steam_appid.txt` si falta. Solo con varias instalaciones hay que escribir la elegida en `ruta_ac` de `P00_control_lateral/configs/juego_ac.json`.
-
-Para construirlo desde el código, con PyInstaller instalado.
-
-```
-python P00_control_lateral/empaquetado/construir_exe.py
-```
-
-## Uso desde el código fuente
-
-Desde la raíz del repositorio.
-
-```
-pip install -r P00_control_lateral/requirements.txt
-python P00_control_lateral/abrir_lanzador.py
-```
-
-Pruebas automáticas, 144 verificaciones en siete archivos que no requieren el simulador.
-
-```
-python P00_control_lateral/pruebas/prueba_humo.py
-```
-
-Los demás archivos de `P00_control_lateral/pruebas/` se ejecutan igual.
-
-La instalación de Assetto Corsa se detecta sola cuando hay una sola en Steam. Las corridas se guardan en `data/raw/p00/corridas`, que no se versiona.
+Funciona solo en Windows con Assetto Corsa y vJoy. La configuración incluida cubre una pista, Monza, y un vehículo, el Alfa Romeo Giulietta QV. El modelo de predicción del MPC lateral es cinemático, sin dinámica de llantas.
 
 ## Componentes de terceros
 
-Assetto Corsa, Steam, vJoy, la trazada de Monza derivada de los archivos del juego y las librerías de Python son de terceros y no forman parte de la obra. Ver `P00_control_lateral/TERCEROS.md`.
+Assetto Corsa, Steam, vJoy, la trazada de Monza derivada de los archivos del juego y las librerías de Python son de terceros y no forman parte de la obra. El detalle, con licencias y atribuciones, está en `TERCEROS.md`.
 
 ## Licencia
 

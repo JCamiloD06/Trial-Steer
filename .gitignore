@@ -11,28 +11,17 @@ Thumbs.db
 *.tmp
 *.bak
 
-# Salidas que el software escribe al usarse. Son datos de estudio, no código.
-data/
-results/
-figures/
-tables/
-logs/
-P00_control_lateral/sintonia_pid/
-P00_control_lateral/sintonia_fase4/
-P00_control_lateral/piloto_fase5/
-P00_control_lateral/resultados_campana/
+# Datos que el programa escribe al usarse
+datos/
+Model Predictive Control/Python/runs/
 
-# Planes generados por el lanzador con semilla. Cada estudio genera los suyos.
-P00_control_lateral/configs/plan_campana.json
-P00_control_lateral/configs/plan_piloto.json
-P00_control_lateral/configs/plan_sintonia.json
-P00_control_lateral/configs/sintonia/
-P00_control_lateral/configs/piloto/
-
-# Salidas intermedias de la documentación
-P00_control_lateral/documentacion/revision_pdf/
-P00_control_lateral/documentacion/entrega/
+# Planes generados por el programa con semilla
+trial_steer/configs/plan_campana.json
+trial_steer/configs/plan_piloto.json
+trial_steer/configs/plan_sintonia.json
+trial_steer/configs/sintonia/
+trial_steer/configs/piloto/
 
 # Construcción del ejecutable. El zip se publica en Releases, no en el repositorio.
-P00_control_lateral/empaquetado/dist/
-P00_control_lateral/empaquetado/build/
+trial_steer/empaquetado/dist/
+trial_steer/empaquetado/build/

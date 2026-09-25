@@ -1,59 +1,48 @@
 # =============================================================================
 # mpc_monza_Completo_barrido.py
 #
-# COPIA PARAMETRIZABLE de mpc_monza_Completo.py para las pruebas reales de
-# incertidumbre/Monte Carlo/sensibilidad/comparacion de arquitectura sobre
-# Assetto Corsa (fase A, el entorno de bajo costo que ya define el proyecto
-# — ver docs/STATE.md, "Correccion de alcance" del 2026-09-07). NO
-# reemplaza mpc_monza_Completo.py ni cambia su logica de control: es un
-# lanzador aparte para no arriesgar el archivo ya calibrado y funcionando.
+# Version parametrizable de mpc_monza_Completo.py, el controlador MPC completo
+# de direccion, acelerador y freno sobre Assetto Corsa. Sin argumentos se
+# comporta igual que el original, con los valores calibrados vigentes. Con
+# argumentos permite cambiar lo que el controlador cree sobre la planta para
+# medir cuanto se degrada el desempeno.
 #
-# IDEA CENTRAL. El volante en fase A es una planta SIMULADA por software
+# Modo de volante simulado. El volante es una planta simulada por software
 # (SimulatedSteeringPlant), no hardware. Eso permite crear un desajuste
-# REAL y controlado entre lo que el MPC cree (J_volante, b_volante,
-# throttle_K, throttle_tau, brake_a_max_ms2, grip_usage_factor,
-# rueda_rad_eje_completo) y lo que efectivamente ocurre, corriendo contra
-# la fisica de verdad de Assetto Corsa como planta del vehiculo. No hace
-# falta conocer los valores "reales" de K/tau/freno/agarre del vehiculo en
-# AC: basta con desconfigurar deliberadamente la creencia del controlador,
-# dejando la fisica de AC intacta, y medir cuanto se degrada el desempeno.
+# controlado entre lo que el MPC cree (J_volante, b_volante, throttle_K,
+# throttle_tau, brake_a_max_ms2, grip_usage_factor, rueda_rad_eje_completo)
+# y lo que efectivamente ocurre, con la fisica de Assetto Corsa como planta
+# del vehiculo. Basta con desconfigurar la creencia del controlador, dejando
+# la fisica del juego intacta.
 #
-# CADA CORRIDA CON OVERRIDES DEBE DOCUMENTARSE EN docs/DECISIONS.md o en el
-# protocolo, con fecha, que parametro se desconfiguro y a que valor,
-# siguiendo la misma disciplina de trazabilidad que el resto del proyecto.
+# Cada corrida guarda en su manifiesto los valores usados, de modo que queda
+# registrado que parametro se cambio y a que valor.
 #
-# ADVERTENCIA DE SEGURIDAD, sin cambios respecto al original: el sistema
-# toma control TOTAL de direccion, acelerador y freno. Tenga a la mano un
-# corte de emergencia, no solo Ctrl+C, sobre todo al probar overrides
-# nunca antes ejecutados.
+# ADVERTENCIA DE SEGURIDAD. El sistema toma control total de direccion,
+# acelerador y freno. Tenga a la mano un corte de emergencia, no solo Ctrl+C,
+# sobre todo al probar valores nunca antes ejecutados.
 #
-# CÓMO CORRERLO (fase A siempre; --ffbeast no tiene sentido para overrides
-# de J_volante/b_volante, que son de la planta simulada):
+# Como correrlo, siempre en modo de volante simulado. --ffbeast no aplica a
+# J_volante ni b_volante, que son de la planta simulada.
 #   python mpc_monza_Completo_barrido.py
-#       corre exactamente igual que mpc_monza_Completo.py (sin overrides,
-#       valores calibrados vigentes) — usar esto primero para confirmar que
-#       la copia se comporta igual que el original antes de desconfigurar
-#       nada.
+#       corre igual que mpc_monza_Completo.py, sin cambios de parametros.
 #   python mpc_monza_Completo_barrido.py --k-ey 0.30
 #       corre con k_ey=0.30 en vez del 0.50 vigente, todo lo demas igual.
 #   python mpc_monza_Completo_barrido.py --arch lateral_pid
-#       reemplaza el MPC longitudinal por un PID simple (para 5.4).
-#   Ver --help para la lista completa de overrides disponibles.
+#       reemplaza el MPC longitudinal por un PID simple.
+#   Ver --help para la lista completa de parametros.
 #
-# REQUISITOS PREVIOS (igual que el original):
-#   - monza_fast_lane.csv en la misma carpeta
-#   - AC abierto con sesión activa en pista
-#   - En AC: Steering=vJoy eje X, Throttle=vJoy eje Y, Brake=vJoy eje RZ
-#   - Gatillos físicos DESVINCULADOS de Throttle/Brake en AC (para que no
-#     compitan con lo que manda el MPC)
+# Requisitos previos.
+#   monza_fast_lane.csv en la misma carpeta.
+#   Assetto Corsa abierto con sesion activa en pista.
+#   En Assetto Corsa, Steering en vJoy eje X, Throttle en vJoy eje Y y Brake
+#   en vJoy eje RZ.
+#   Gatillos fisicos desvinculados de Throttle y Brake, para que no compitan
+#   con lo que manda el MPC.
 #
-# NO PROBADO CONTRA AC/vJoy REALES por quien escribio este archivo (sin
-# acceso a Windows/AC/vJoy). La logica de control, lectura de memoria
-# compartida y escritura a vJoy es COPIA LITERAL del original — solo se
-# tocaron la construccion de CFG/model_params/planta y la seleccion de
-# arquitectura longitudinal. Aun asi, corra primero SIN overrides (arriba)
-# para confirmar que el comportamiento es identico al original conocido
-# antes de usar esto para una sesion de pruebas real.
+# La logica de control, la lectura de memoria compartida y la escritura a vJoy
+# son las del original. Solo cambian la construccion de CFG, model_params y la
+# planta, y la seleccion de arquitectura longitudinal.
 # =============================================================================
 
 import argparse
@@ -83,7 +72,7 @@ except ImportError:
 
 
 # =============================================================================
-# SECCIÓN 1 — SHARED MEMORY DE AC (sin cambios)
+# SECCIÓN 1, SHARED MEMORY DE AC (sin cambios)
 # =============================================================================
 
 class SPageFilePhysics(ctypes.Structure):
@@ -223,7 +212,7 @@ class ACSharedMemory:
 
 
 # =============================================================================
-# SECCIÓN 2 — TRAZADA Y FRENET (sin cambios)
+# SECCIÓN 2, TRAZADA Y FRENET (sin cambios)
 # =============================================================================
 
 class ReferencePath:
@@ -299,7 +288,7 @@ class ReferencePath:
 
 
 # =============================================================================
-# SECCIÓN 3 — REFERENCIA DE DIRECCIÓN (sin cambios)
+# SECCIÓN 3, REFERENCIA DE DIRECCIÓN (sin cambios)
 # =============================================================================
 
 class ReferenceGenerator:
@@ -409,7 +398,7 @@ class ReferenceGenerator:
 
 
 # =============================================================================
-# SECCIÓN 3B — PERFIL DE VELOCIDAD (sin cambios; salida en m/s)
+# SECCIÓN 3B, PERFIL DE VELOCIDAD (sin cambios, salida en m/s)
 # =============================================================================
 
 class SpeedProfileGenerator:
@@ -515,7 +504,7 @@ class SpeedProfileGenerator:
 
 
 # =============================================================================
-# SECCIÓN 4 — MPC DE DIRECCIÓN (sin cambios)
+# SECCIÓN 4, MPC DE DIRECCIÓN (sin cambios)
 # =============================================================================
 
 class MPCSteeringController:
@@ -590,55 +579,49 @@ class MPCSteeringController:
 
 
 # =============================================================================
-# SECCIÓN 4B — MPC LONGITUDINAL — TU MODELO K/TAU VALIDADO
+# SECCIÓN 4B, MPC LONGITUDINAL CON MODELO K/TAU IDENTIFICADO
 # =============================================================================
 
 class MPCLongitudinalController:
     """
-    NOTA sobre Ts vs Ts_pred: `ts` (el paso de tiempo usado en la
-    predicción interna del modelo) puede ser MÁS GRANDE que la frecuencia
-    real a la que este controlador se llama y aplica comandos.
+    Ts de actuación y ts de predicción. `ts`, el paso de tiempo de la
+    predicción interna del modelo, puede ser MÁS GRANDE que el periodo con
+    el que este controlador se llama y aplica comandos.
 
-    Esto es intencional: tu dinámica de aceleración tiene τ≈2.8s (mucho más
-    lenta que la de dirección, τ≈0.2s). Si predices con el mismo Ts=0.05s
-    que usas para actuar, tu horizonte de N=15 pasos solo cubre 0.75s —
-    menos de un tercio de τ, así que el MPC nunca "ve" su propia dinámica
-    asentarse, es miope respecto a su propia física.
+    Es intencional. La dinámica de aceleración tiene τ≈2.8 s, mucho más
+    lenta que la de dirección, τ≈0.2 s. Con el mismo Ts=0.05 s de la
+    actuación, un horizonte de N=15 pasos cubre solo 0.75 s, menos de un
+    tercio de τ, y el MPC nunca ve asentarse su propia dinámica.
 
-    Al predecir con ts=0.2s mientras sigues APLICANDO el u_0* resultante
-    cada 0.05s (recompute cada ciclo, horizonte deslizante como siempre),
-    el mismo N=15 ahora cubre 3s de horizonte — sí alcanza a cubrir τ.
-    El loop de actuación no cambia de frecuencia, solo la resolución
-    temporal con la que el modelo interno predice el futuro.
+    Al predecir con ts=0.2 s y seguir aplicando el u_0* resultante cada
+    0.05 s, con horizonte deslizante, el mismo N=15 cubre 3 s y sí alcanza
+    a cubrir τ. El lazo de actuación no cambia de frecuencia, solo la
+    resolución temporal con la que el modelo interno predice.
 
-    MODELO — DOS ESTRUCTURAS DISTINTAS, NO UNA (cambio importante respecto
-    a versiones anteriores de este archivo):
+    Modelo con dos estructuras distintas, una para acelerador y otra para
+    freno.
 
-      THROTTLE (u >= 0): primer orden, igual que antes.
+      THROTTLE (u >= 0), primer orden.
           v[k+1] = v[k] + (ts/tau_th) * ( -v[k] + K_th*u )
-        Tiene sentido como saturación SUAVE (resistencia aerodinámica
-        creciente con v). Identificado por step-response real.
+        Funciona como saturación suave por la resistencia aerodinámica
+        creciente con v. Identificado con respuesta al escalón.
 
-      BRAKE (u < 0): desaceleración CONSTANTE, no exponencial.
+      BRAKE (u < 0), desaceleración CONSTANTE, no exponencial.
           v[k+1] = max(0, v[k] - ts * a_brake_max * |u| )
-        Este cambio se hizo después de ver los datos reales de frenado:
-        la velocidad decae casi perfectamente en LÍNEA RECTA (R²≈0.999
-        con un ajuste lineal, contra R²≈0.83-0.94 forzando una
-        exponencial). Tiene sentido físico: el freno aplica una fuerza de
-        fricción casi constante, no una fuerza que decae con v como el
-        arrastre aerodinámico — es la misma física que ya asume
-        ax_brake_max en SpeedProfileGenerator, así que este cambio
-        también hace que el MPC longitudinal y el generador de perfil de
-        velocidad queden usando el MISMO modelo de frenado.
+        Los datos de frenado muestran que la velocidad decae casi en línea
+        recta, R²≈0.999 con un ajuste lineal frente a R²≈0.83 a 0.94 con
+        una exponencial. El freno aplica una fuerza de fricción casi
+        constante, no una fuerza que decae con v como el arrastre. Es la
+        misma física que asume ax_brake_max en SpeedProfileGenerator, de
+        modo que el MPC longitudinal y el generador de perfil usan el mismo
+        modelo de frenado.
 
-        Un hallazgo de la calibración real: a_brake salió CASI IDÉNTICO
-        (10.1-10.5 m/s²) en las 4 amplitudes de prueba (0.3 a 1.0) — el
-        auto ya está cerca del límite de agarre incluso con freno parcial,
-        así que este modelo usa a_brake_max escalado por |u| de forma
-        conservadora (asume que a u=1.0 sí obtienes el a_brake_max medido,
-        y escala proporcionalmente hacia abajo para u menor) — subestima
-        un poco el frenado a pedal parcial en vez de sobreestimarlo, que
-        es la dirección segura del error.
+        En la calibración a_brake salió casi igual, 10.1 a 10.5 m/s², en
+        las 4 amplitudes de prueba, de 0.3 a 1.0. El vehículo ya está cerca
+        del límite de agarre con freno parcial. El modelo escala a_brake_max
+        por |u| de forma conservadora, suponiendo que con u=1.0 se obtiene
+        el valor medido, y así subestima un poco el frenado a pedal parcial
+        en vez de sobreestimarlo, que es la dirección segura del error.
     """
     def __init__(self, model_params, ts=0.05, horizon=10, v_scale_kmh=10.0,
                  anti_bloqueo=True):
@@ -675,7 +658,7 @@ class MPCLongitudinalController:
         self.last_nit = 0
         self.last_cost = 0.0
         # --- Salvaguarda anti bloqueo, SOLO en este script de prueba ---
-        # Hallazgo del 2026-09-10 (docs/DECISIONS.md): el warm start puede
+        # Observado en pista el 2026-09-10. El warm start puede
         # quedar atrapado cerca de cero cuando la banda muerta fija u_prev=0
         # justo antes de que el objetivo de velocidad suba fuerte. El
         # optimizador entonces reporta nit=0/no convergencia de forma
@@ -773,15 +756,13 @@ class MPCLongitudinalController:
 
 
 # =============================================================================
-# SECCIÓN 4B-BIS — PID LONGITUDINAL (NUEVO, solo para --arch lateral_pid)
+# SECCIÓN 4B-BIS, PID LONGITUDINAL (NUEVO, solo para --arch lateral_pid)
 #
-# Controlador longitudinal alterno para la prueba 5.4 del protocolo (P01:
-# MPC coordinado vs. MPC lateral + control longitudinal desacoplado). Mismo
+# Controlador longitudinal alterno, para comparar el MPC coordinado con un MPC
+# lateral y control longitudinal desacoplado. Mismo
 # rol que MPCLongitudinalController (recibe velocidad actual y objetivo,
 # devuelve un comando en [-1, 1]), para poder intercambiarlos sin tocar el
-# resto del bucle. Ganancias NO sintonizadas formalmente — ver
-# docs/PROTOCOLO_ANALISIS_INCERTIDUMBRE_MPC.md seccion 5.4 para la
-# limitacion declarada sobre esto.
+# resto del bucle. Ganancias NO sintonizadas formalmente.
 # =============================================================================
 
 class PIDLongitudinalController:
@@ -809,7 +790,7 @@ class PIDLongitudinalController:
 
 
 # =============================================================================
-# SECCIÓN 4C — KALMAN DE DIRECCIÓN (sin cambios, solo Fase B)
+# SECCIÓN 4C, KALMAN DE DIRECCIÓN, solo con volante fisico
 # =============================================================================
 
 class SteeringKalmanFilter:
@@ -844,7 +825,7 @@ class SteeringKalmanFilter:
 
 
 # =============================================================================
-# SECCIÓN 5 — PLANTAS DEL VOLANTE (sin cambios)
+# SECCIÓN 5, PLANTAS DEL VOLANTE (sin cambios)
 # =============================================================================
 
 class SimulatedSteeringPlant:
@@ -948,7 +929,7 @@ class FFBeastSteeringPlant:
 
 
 # =============================================================================
-# SECCIÓN 5B — CONFORMADOR DE PEDAL (acelerador y freno progresivos)
+# SECCIÓN 5B, CONFORMADOR DE PEDAL (acelerador y freno progresivos)
 # =============================================================================
 
 class PedalShaper:
@@ -995,7 +976,7 @@ class PedalShaper:
 
 
 # =============================================================================
-# SECCIÓN 5C — RECOLECCIÓN DE DATOS DE LA CORRIDA
+# SECCIÓN 5C, RECOLECCIÓN DE DATOS DE LA CORRIDA
 # =============================================================================
 
 TELEMETRY_COLUMNS = [
@@ -1362,7 +1343,7 @@ class RunRecorder:
 
 
 # =============================================================================
-# SECCIÓN 6 — SALIDA A VJOY (3 ejes: X=steer, Y=gas, RZ=freno)
+# SECCIÓN 6, SALIDA A VJOY (3 ejes: X=steer, Y=gas, RZ=freno)
 # =============================================================================
 
 class VJoyOutput:
@@ -1405,7 +1386,7 @@ class VJoyOutput:
 
 
 # =============================================================================
-# SECCIÓN 7 — LOOP PRINCIPAL ÚNICO
+# SECCIÓN 7, LOOP PRINCIPAL ÚNICO
 # =============================================================================
 
 # =============================================================================
@@ -1505,7 +1486,7 @@ def main(use_ffbeast=False, overrides=None, arch="coordinado", run_label=None,
     # valor None) y dict.get solo usa el default cuando la llave falta.
     overrides = {k: v for k, v in dict(overrides or {}).items() if v is not None}
     # Copia local de CFG con los overrides aplicados. CFG global (arriba)
-    # queda intacto — corran sin argumentos y esto se comporta identico al
+    # queda intacto. Sin argumentos esto se comporta identico al
     # original, valor por valor.
     CFG = dict(globals()["CFG"])
     for k, v in overrides.items():
@@ -1514,7 +1495,7 @@ def main(use_ffbeast=False, overrides=None, arch="coordinado", run_label=None,
             CFG[k] = v
 
     print("=" * 60)
-    print("  MPC UNIFICADO — Dirección + Gas/Freno | Monza  (BARRIDO)")
+    print("  MPC UNIFICADO, Dirección + Gas/Freno | Monza  (BARRIDO)")
     if overrides or arch != "coordinado" or run_label:
         print(f"  arch={arch}  run_label={run_label}  overrides={overrides}")
     print("=" * 60)
@@ -1561,7 +1542,7 @@ def main(use_ffbeast=False, overrides=None, arch="coordinado", run_label=None,
     else:
         # J_volante/b_volante: SOLO afectan esta planta SIMULADA (la
         # "realidad" de la prueba). mpc_steer (abajo) NUNCA recibe estos
-        # overrides — sigue creyendo J=0.02, b=0.1 (los defaults de la
+        # overrides, sigue creyendo J=0.02, b=0.1 (los defaults de la
         # clase), que es exactamente el desajuste que se quiere probar.
         J_volante_real = overrides.get("J_volante", 0.02)
         b_volante_real = overrides.get("b_volante", 0.1)
@@ -1620,13 +1601,13 @@ def main(use_ffbeast=False, overrides=None, arch="coordinado", run_label=None,
         # la velocidad máxima de 241 km/h que declara la ficha del vehículo en
         # Assetto Corsa, que es una confirmación independiente.
         # overrides["throttle_K"]/["throttle_tau"] cambian SOLO lo que el
-        # MPC longitudinal cree — la respuesta real del acelerador sigue
+        # MPC longitudinal cree. La respuesta real del acelerador sigue
         # siendo la que Assetto Corsa simula de verdad para este vehiculo,
         # sin cambios. Ese desajuste es la prueba.
         'throttle': {'K': overrides.get('throttle_K', 248.7),
                      'tau': overrides.get('throttle_tau', 17.20)},
 
-        # Brake: YA NO es K/tau — ver el docstring de MPCLongitudinalController
+        # Brake no es K/tau, ver el docstring de MPCLongitudinalController
         # más arriba para la explicación completa del cambio de modelo.
         # a_brake_max identificado con el mismo flujo: desaceleración casi
         # idéntica (10.1-10.5 m/s², R²≈0.999) en las 4 amplitudes de prueba.
@@ -1635,11 +1616,10 @@ def main(use_ffbeast=False, overrides=None, arch="coordinado", run_label=None,
         'brake_a_max_ms2': overrides.get('brake_a_max_ms2', 10.25),
     }
     if arch == "lateral_pid":
-        # Prueba 5.4: MPC lateral + control longitudinal DESACOPLADO tipo
-        # PID, en vez del MPC coordinado. Ver la limitacion declarada sobre
-        # la sintonia del PID en el protocolo, seccion 5.4.
+        # MPC lateral y control longitudinal DESACOPLADO tipo PID, en vez
+        # del MPC coordinado. Las ganancias del PID no estan sintonizadas.
         mpc_speed = PIDLongitudinalController(dt=Ts)
-        print("      [ARQUITECTURA] longitudinal = PID desacoplado (prueba 5.4)")
+        print("      [ARQUITECTURA] longitudinal = PID desacoplado")
     elif arch == "coordinado":
         mpc_speed = MPCLongitudinalController(model_params, ts=0.05, horizon=10,
                                               v_scale_kmh=CFG["long_v_scale_kmh"],
@@ -1914,20 +1894,19 @@ def main(use_ffbeast=False, overrides=None, arch="coordinado", run_label=None,
 
 def _parse_args():
     p = argparse.ArgumentParser(
-        description="Copia parametrizable de mpc_monza_Completo.py para las "
-                     "pruebas reales de incertidumbre/Monte Carlo/sensibilidad/"
-                     "comparacion de arquitectura sobre Assetto Corsa (fase A). "
+        description="Version parametrizable de mpc_monza_Completo.py sobre "
+                     "Assetto Corsa, con volante simulado. "
                      "Sin argumentos, se comporta identico al original.")
     p.add_argument("--ffbeast", action="store_true",
-                    help="fase B, volante fisico. NO usar junto con "
+                    help="volante fisico. NO usar junto con "
                          "--J-volante/--b-volante (esos overrides son solo "
-                         "de la planta simulada de fase A).")
+                         "de la planta simulada).")
     p.add_argument("--arch", choices=["coordinado", "lateral_pid"], default="coordinado",
-                    help="arquitectura longitudinal (prueba 5.4). Por defecto "
+                    help="arquitectura longitudinal. Por defecto "
                          "'coordinado', igual que el original.")
     p.add_argument("--run-label", default=None,
                     help="etiqueta libre para identificar esta corrida en el "
-                         "manifiesto (ej. 'p5.1_rueda_real_0.40')")
+                         "manifiesto (ej. 'rueda_real_0.40')")
     p.add_argument("--sin-salvaguarda", action="store_true",
                     dest="sin_salvaguarda",
                     help="desactiva la salvaguarda anti bloqueo del MPC "
@@ -1938,7 +1917,7 @@ def _parse_args():
                     help="subcarpeta dentro de runs/ para esta corrida (ej. "
                          "'5.2_montecarlo'), solo para organizar. El analisis "
                          "no depende de esto, filtra por barrido_run_label.")
-    # --- Overrides de la CREENCIA del controlador (pruebas 5.1/5.2/5.3) ---
+    # --- Overrides de la CREENCIA del controlador ---
     p.add_argument("--k-ey", type=float, default=None, dest="k_ey")
     p.add_argument("--ff-gain", type=float, default=None, dest="ff_gain")
     p.add_argument("--rueda-rad-eje-completo", type=float, default=None,
@@ -1955,11 +1934,11 @@ def _parse_args():
     p.add_argument("--throttle-tau", type=float, default=None, dest="throttle_tau")
     p.add_argument("--brake-a-max", type=float, default=None, dest="brake_a_max_ms2")
     p.add_argument("--J-volante", type=float, default=None, dest="J_volante",
-                    help="inercia REAL de la planta simulada del volante "
-                         "(fase A). El MPC de direccion sigue creyendo 0.02.")
+                    help="inercia REAL de la planta simulada del volante. "
+                         "El MPC de direccion sigue creyendo 0.02.")
     p.add_argument("--b-volante", type=float, default=None, dest="b_volante",
-                    help="friccion REAL de la planta simulada del volante "
-                         "(fase A). El MPC de direccion sigue creyendo 0.1.")
+                    help="friccion REAL de la planta simulada del volante. "
+                         "El MPC de direccion sigue creyendo 0.1.")
     return p.parse_args()
 
 
