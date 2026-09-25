@@ -51,13 +51,16 @@ def ejecutar_script(ruta, argumentos):
 
 def utf8():
     """
-    Salida en UTF-8. El ejecutable ignora PYTHONIOENCODING, que el lanzador pone
-    a sus procesos hijos, y la consola de Windows usa cp1252, donde no existen
-    ψ ni δ. Sin esto la corrida se cae en la primera línea de salida.
+    Salida en UTF-8 y sin búfer. El ejecutable ignora PYTHONIOENCODING, que el
+    lanzador pone a sus procesos hijos, y la consola de Windows usa cp1252,
+    donde no existen ψ ni δ. Sin esto la corrida se cae en la primera línea de
+    salida. El ejecutable tampoco aplica la opción -u con la que el lanzador
+    abre las corridas, y sin write_through la salida llega a Salida en vivo en
+    bloques de varios kilobytes y no línea por línea.
     """
     for flujo in (sys.stdout, sys.stderr):
         if flujo is not None and hasattr(flujo, "reconfigure"):
-            flujo.reconfigure(encoding="utf-8", errors="replace")
+            flujo.reconfigure(encoding="utf-8", errors="replace", line_buffering=True, write_through=True)
 
 
 def main():
